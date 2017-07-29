@@ -21,6 +21,11 @@ struct is_authorization: detail::is_authorization<T>
 {
 };
 
+template <typename T>
+struct is_transport_adapter: detail::is_transport_adapter<T>
+{
+};
+
 } // END namespace hypertext
 
 #endif

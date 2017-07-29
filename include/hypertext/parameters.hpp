@@ -25,6 +25,8 @@ struct auth_param;
 /// How many milli-seconds to wait for the server to send response.
 struct timeout_param;
 
+/// Option to enable streaming download
+struct stream;
 
 /// Method Parameter Definitions
 //------------------------------
@@ -38,10 +40,10 @@ struct method_param
 
 struct headers_param
 {
-  headers_param(request_header);
-  request_header get();
+  headers_param(types::request_header);
+  types::request_header get();
 
-  request_header headers_;
+  types::request_header headers_;
 };
 
 template <typename AuthConceptT>
@@ -55,10 +57,17 @@ struct auth_param
 
 struct timeout_param
 {
+  timeout_param(std::chrono::milliseconds);
   std::chrono::milliseconds get() const noexcept;
   std::chrono::milliseconds timeout_;
 };
 
+struct stream_param
+{
+  stream_param(bool);
+  bool get() const noexcept;
+  bool stream_ = false;
+};
 
 /// Parameter creators
 //-------------------------------
@@ -99,6 +108,11 @@ timeout(std::chrono::milliseconds);
  */
 timeout_param 
 timeout(std::chrono::seconds);
+
+/*
+ */
+stream_param
+stream(bool);
 
 } // END namespace parameters
 } // END namespace hypertext

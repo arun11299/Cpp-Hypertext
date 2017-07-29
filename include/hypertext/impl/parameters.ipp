@@ -12,12 +12,12 @@ beast::http::verb method_param::get() const noexcept
   return method_;
 }
 
-headers_param::headers_param(request_header h)
+headers_param::headers_param(types::request_header h)
   : headers_(std::move(h))
 {
 }
 
-request_header headers_param::get()
+types::request_header headers_param::get()
 {
   return std::move(headers_);
 }
@@ -34,11 +34,25 @@ AuthConceptT auth_param<AuthConceptT>::get()
   return std::move(auth_);
 }
 
+timeout_param::timeout_param(std::chrono::milliseconds s)
+  : timeout_(s)
+{
+}
+
 std::chrono::milliseconds timeout_param::get() const noexcept
 {
   return timeout_;
 }
 
+stream_param::stream_param(bool b)
+  : stream_(b)
+{
+}
+
+bool stream_param::get() const noexcept
+{
+  return stream_;
+}
 
 // Parameter creator function implementation
 // --------------------------------------------------------------
@@ -53,7 +67,7 @@ headers_param
 headers(
     const std::initializer_list<std::pair<beast::string_view, beast::string_view>>& kv)
 {
-  request_header rheader;
+  types::request_header rheader;
 
   for (auto elem : kv) {
     rheader.set(elem.first, elem.second);
@@ -69,7 +83,7 @@ headers(HeaderConceptT&& hc)
   static_assert(is_header_compatible<typename std::decay<HeaderConceptT>::type>{},
       "Type does not match the requirements for a header dictionary");
 
-  hypertext::request_header rheader;
+  hypertext::types::request_header rheader;
 
   for (auto elem : hc) {
     rheader.set(elem.first, elem.second);
@@ -99,6 +113,13 @@ timeout(std::chrono::seconds s)
 {
   return timeout_param{std::chrono::duration_cast<std::chrono::milliseconds>(s)};
 }
+
+stream_param
+stream(bool b)
+{
+  return stream_param{b};
+}
+
 
 } // END namespace parameters
 } // END namespace hypertext
