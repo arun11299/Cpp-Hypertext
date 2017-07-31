@@ -11,6 +11,14 @@ struct is_parameter: detail::is_parameter<T>
 {
 };
 
+template <typename... T>
+struct are_parameters: 
+  detail::are_all_parameters<
+          detail::all_true<is_parameter<T>::value...>{},
+          T...>
+{
+};
+
 template <typename T>
 struct is_header_compatible: detail::is_header_compatible<T>
 {

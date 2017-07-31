@@ -12,6 +12,11 @@ beast::http::verb method_param::get() const noexcept
   return method_;
 }
 
+beast::string_view url_param::get() const noexcept
+{
+  return url_;
+}
+
 headers_param::headers_param(types::request_header h)
   : headers_(std::move(h))
 {
@@ -61,6 +66,12 @@ method_param
 method(beast::http::verb meth)
 {
   return method_param{meth};
+}
+
+url_param
+url(beast::string_view url)
+{
+  return url_param{url};
 }
 
 headers_param

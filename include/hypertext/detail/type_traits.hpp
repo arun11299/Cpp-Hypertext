@@ -3,6 +3,7 @@
 
 #include <string>
 #include <type_traits>
+#include "hypertext/types.hpp"
 
 namespace hypertext {
 namespace detail {
@@ -108,7 +109,11 @@ struct is_transport_adapter: std::false_type
 template <typename T>
 struct is_transport_adapter<T, void_t<
                                 decltype(
-                                    std::declval<T&>().send(),
+                                    std::declval<T&>().send(
+                                      std::declval<const types::request&>(),
+                                      std::declval<beast::string_view>(),
+                                      std::declval<uint16_t>()),
+
                                     std::declval<T&>().close(),
                                     (void)0)
                                >

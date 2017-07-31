@@ -4,12 +4,14 @@
 #include <chrono>
 
 #include "beast/http/message.hpp"
+#include "beast/http/string_body.hpp"
 #include "beast/http/dynamic_body.hpp"
 
 namespace hypertext {
 namespace types {
 
 using request_header = beast::http::request_header<>;
+using request = beast::http::request<beast::http::string_body>;
 
 /*
  */
@@ -28,7 +30,7 @@ public: // Exposed APIs
   }
 
 private:
-  std::chrono::milliseconds elapsed_time_ = 0;
+  std::chrono::milliseconds elapsed_time_;
 };
 
 } // END namespace hypertext

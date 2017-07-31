@@ -15,6 +15,12 @@ namespace parameters {
 /// The HTTP method for the request.
 struct method_param;
 
+/// The URL to query
+struct url_param;
+
+/// Optional query string to send
+struct params_param;
+
 /// The dictionary/map of HTTP headers to be sent.
 struct headers_param;
 
@@ -26,7 +32,7 @@ struct auth_param;
 struct timeout_param;
 
 /// Option to enable streaming download
-struct stream;
+struct stream_param;
 
 /// Method Parameter Definitions
 //------------------------------
@@ -36,6 +42,12 @@ struct method_param
   beast::http::verb get() const noexcept;
 
   beast::http::verb method_;
+};
+
+struct url_param
+{
+  beast::string_view get() const noexcept;
+  beast::string_view url_;
 };
 
 struct headers_param
@@ -76,6 +88,11 @@ struct stream_param
  */
 method_param 
 method(beast::http::verb);
+
+/*
+ */
+url_param
+url(beast::string_view url);
 
 /*
  */
