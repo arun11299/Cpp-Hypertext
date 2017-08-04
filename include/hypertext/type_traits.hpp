@@ -34,6 +34,11 @@ struct is_transport_adapter: detail::is_transport_adapter<T>
 {
 };
 
+template <typename T>
+struct is_named_arg: detail::is_named_arg<T>
+{
+};
+
 } // END namespace hypertext
 
 #endif

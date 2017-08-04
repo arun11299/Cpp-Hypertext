@@ -121,6 +121,24 @@ struct is_transport_adapter<T, void_t<
 {
 };
 
+
+/*
+ */
+template <typename T, typename=void>
+struct is_named_arg: std::false_type
+{
+};
+
+template <typename T>
+struct is_named_arg<T, void_t<
+                        typename std::enable_if<
+                            std::is_same<decltype(T::value()), char const*>::value,
+                            void>::type
+                       >
+                   >: std::true_type
+{
+};
+
 } // END namespace detail
 } // END namespace hypertext
 
