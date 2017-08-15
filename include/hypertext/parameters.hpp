@@ -91,6 +91,11 @@ method(beast::http::verb);
 
 /*
  */
+method_param
+method(beast::string_view);
+
+/*
+ */
 url_param
 url(beast::string_view url);
 

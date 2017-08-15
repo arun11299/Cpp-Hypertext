@@ -35,20 +35,34 @@ public: // Exposed APIs
 
   /*
    */
-  types::response send(
-      const types::request& req, 
-      beast::string_view host, 
-      uint16_t port);
+  types::response send(const types::request& req,
+                       beast::string_view    host, 
+                       uint16_t              port,
+                       bool                  stream);
+
+  /*
+   */
+  template <typename DynamicBuffer>
+  void read_next_chunked_body(DynamicBuffer& buf, //parser buffer
+                              types::emptybody_parser& p,
+                              beast::error_code& ec);
 
   /*
    */
   void close();
 
+
 private: // Private implementation details
   /*
    */
-  void connect_to_peer(
-      beast::string_view host, uint16_t port);
+  void connect_to_peer(beast::string_view host,
+                       uint16_t           port);
+
+  /*
+   */
+  template <typename DynamicBuffer>
+  void read_chunked_response(types::response& response,
+                             DynamicBuffer&   buf);
 
 private:
   /// ASIO IO service event loop

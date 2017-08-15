@@ -82,7 +82,7 @@ static constexpr auto make_ct_string()
 {
   static_assert (is_named_arg<NamedArg>::value, 
       "make_ct_string template parameter must model NamedArg concept");
-  ct_string<ct_strlen(Arg::value())> cstr{Arg::value()};
+  ct_string<ct_strlen(NamedArg::value())> cstr{NamedArg::value()};
   return cstr;
 }
 

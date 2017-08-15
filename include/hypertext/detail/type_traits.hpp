@@ -112,7 +112,8 @@ struct is_transport_adapter<T, void_t<
                                     std::declval<T&>().send(
                                       std::declval<const types::request&>(),
                                       std::declval<beast::string_view>(),
-                                      std::declval<uint16_t>()),
+                                      std::declval<uint16_t>(),
+                                      std::declval<bool>()),
 
                                     std::declval<T&>().close(),
                                     (void)0)

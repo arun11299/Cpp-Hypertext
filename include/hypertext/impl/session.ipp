@@ -29,7 +29,8 @@ types::response session<TransportAdapter>::request(Args&&... args)
 
   auto req = prepare_request(rparams);
 
-  return transport_.send(req, "www.example.com", 80);
+  return transport_.send(req, "127.0.0.1", 8080, 
+                         (rparams.stream ? *rparams.stream : false));
 }
 
 template <typename TransportAdapter>
@@ -56,7 +57,7 @@ prepare_request(const request_parameters& p)
   }
 
   // TODO: Fill it up at a proper place
-  headers_.insert(beast::http::field::host, "www.example.com:80");
+  //headers_.insert(beast::http::field::host, "www.example.com:80");
 
   // copy the headers
   static_cast<types::request_header&>(request) = headers_;

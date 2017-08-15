@@ -9,11 +9,18 @@ void test_session_basic()
 {
   ht::session<ht::adapter::asio_transport> sess;
   using namespace ht::parameters;
+
   auto res = sess.request(
-        method(beast::http::verb::get),
-        url("www.example.com")
+        method("GET"),
+        url("127.0.0.1:8080"),
+        stream(true)
       );
-  std::cout << res << std::endl;
+  if (res.has_chunked_response()) {
+    std::cout << "Response has chunked response\n";
+    while (res.get_chunk_response_block().fill_in_next_chunk(sess.transport())) {
+      std::cout << res.get_chunk_response_block().get_chunk_body() << std::endl;
+    }
+  }
 }
 
 

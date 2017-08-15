@@ -68,6 +68,12 @@ method(beast::http::verb meth)
   return method_param{meth};
 }
 
+method_param
+method(beast::string_view meth)
+{
+  return method(beast::http::string_to_verb(meth));
+}
+
 url_param
 url(beast::string_view url)
 {
@@ -129,6 +135,20 @@ stream_param
 stream(bool b)
 {
   return stream_param{b};
+}
+
+namespace literals {
+
+auto operator "" _verb(const char* s, size_t l)
+{
+  return method(beast::string_view{s, l});
+}
+
+auto operator "" _url(const char* s, size_t l)
+{
+  return url(beast::string_view{s, l});
+}
+
 }
 
 

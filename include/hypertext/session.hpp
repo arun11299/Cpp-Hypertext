@@ -93,11 +93,11 @@ private: // Private data structures
       set_param(std::forward<Args>(args)...);
     }
 
-    boost::optional<beast::http::verb> method;
-    boost::optional<beast::string_view> url;
-    boost::optional<types::request_header> req_headers;
+    boost::optional<beast::http::verb>         method;
+    boost::optional<beast::string_view>        url;
+    boost::optional<types::request_header>     req_headers;
     boost::optional<std::chrono::milliseconds> timeout;
-    boost::optional<bool> stream;
+    boost::optional<bool>                      stream;
 
   private:
     template <typename... Args>
