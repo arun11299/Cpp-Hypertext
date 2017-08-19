@@ -6,6 +6,8 @@
 #include <iterator>
 #include <functional>
 
+#include <boost/assert.hpp>
+
 #include "beast/http/error.hpp"
 #include "beast/http/parser.hpp"
 #include "beast/http/message.hpp"
@@ -22,6 +24,9 @@ using response_header  = beast::http::request_header<>;
 using emptybody_parser = beast::http::parser<false, beast::http::empty_body>;
 
 struct in_place_construct_t {};
+
+//Fwd Decl
+class response;
 
 /*
  */
@@ -54,25 +59,34 @@ public: // Exposed APIs
 };
 
 /*
+ *
  */
-class response: 
-  public beast::http::response<beast::http::dynamic_body>
+template <typename TransportAdapter, typename ChunkBodyStore>
+class chunked_response
 {
-public: // 'tors
-  response() = default;
-  response(const response&) = delete;
-  response(response&&) = default;
-  response& operator=(const response&) = delete;
-  response& operator=(response&&) = default;
-
-public:
+public: //'tors
   /*
    */
-  template <typename ChunkBodyStorage = std::string>
+  chunked_response(response& resp, TransportAdapter& transport)
+    : parent_resp_(resp)
+    , transport_(transport)
+  {
+    crb_.emplace(in_place_construct_t{});
+  }
+
+  chunked_response(const chunked_response&) = delete;
+  chunked_response(chunked_response&&) = default;
+  chunked_response& operator=(const chunked_response&) = delete;
+  chunked_response& operator=(chunked_response&&) = default;
+  ~chunked_response() = default;
+
+public: // Internal classes
+  /*
+   */
   class chunk_response_block
   {
-  public: //typedefs
-    using storage_type = ChunkBodyStorage;
+  public: // typedefs
+    using storage_type = ChunkBodyStore;
 
   public: // 'tors
     chunk_response_block(in_place_construct_t);
@@ -104,17 +118,16 @@ public:
 
     /*
      */
-    ChunkBodyStorage&
+    ChunkBodyStore&
     get_storage() noexcept { return chunk_body_; }
 
     /*
      */
-    template <typename TransportAdapter>
     bool fill_in_next_chunk(TransportAdapter& transport);
 
-  private:
+  private: // Data members (chunk_response_block)
     /// Storage for storing the chunk body
-    ChunkBodyStorage chunk_body_;
+    storage_type chunk_body_;
     /// The dynamic buffer used for parsing
     beast::flat_buffer pbuf_;
     /// HTTP parser
@@ -124,54 +137,53 @@ public:
 
     //Chunk decoding callbacks
     std::function<
-      void(uint64_t,
-           beast::string_view,
-           beast::error_code&)> on_chunk_header_cb_;
-
-    std::function<
-      size_t(uint64_t,
+        void(uint64_t,
              beast::string_view,
-             beast::error_code&)> on_chunk_body_cb_;
-  };
+             beast::error_code&)> on_chunk_header_cb_;
+ 
+    std::function<
+        size_t(uint64_t,
+               beast::string_view,
+               beast::error_code&)> on_chunk_body_cb_;
 
+  };
 
   /*
    */
-  template <typename CRB, typename Transport>
   class chunk_iterator
   {
   public: // iterator typedefs
-    using value_type = beast::string_view;
-    using pointer    = typename std::add_pointer<CRB>::type;
-    using reference  = typename std::add_lvalue_reference<CRB>::type;
-    using difference_type = size_t;
+    using value_type        = beast::string_view;
+    using pointer           = chunk_response_block*;
+    using reference         = typename std::add_lvalue_reference<chunk_response_block>::type;
+    using difference_type   = size_t;
     using iterator_category = std::input_iterator_tag;
 
     /*
-     * https://stackoverflow.com/questions/35165828/how-to-implement-dereference-and-post-increment-for-input-iterator-in-c
+     * https://stackoverflow.com/questions/35165828/
      */
     class post_increment_proxy
     {
     public:
-      post_increment_proxy(const typename CRB::storage_type& s)
+      post_increment_proxy(const typename chunk_response_block::storage_type& s)
         : value_(s)
       {}
       post_increment_proxy(const post_increment_proxy&) = default;
       post_increment_proxy& operator=(const post_increment_proxy&) = default;
 
     public:
-      typename CRB::storage_type&
+      typename chunk_response_block::storage_type&
       operator*() const 
       {
         return value_;
       }
 
     private:
-      typename CRB::storage_type value_;
+      typename chunk_response_block::storage_type value_;
     };
 
   public: // 'tors
-    chunk_iterator(CRB& crb, Transport& transport)
+    chunk_iterator(chunk_response_block& crb, TransportAdapter& transport)
       : crb_ref_(crb)
       , transport_(transport)
     {}
@@ -219,54 +231,88 @@ public:
      */
     bool finished() const noexcept { return finished_; }
 
+    /// Friends
+    friend bool operator==(const chunk_iterator& a, const chunk_iterator& b)
+    {
+      return a.finished() == b.finished();
+    }
+    friend bool operator!=(const chunk_iterator& a, const chunk_iterator& b)
+    {
+      return !(a == b);
+    }
+
   private:
     ///
     bool finished_ = false;
     ///
-    boost::optional<CRB&> crb_ref_;
+    boost::optional<chunk_response_block&> crb_ref_;
     ///
-    boost::optional<Transport&> transport_;
+    boost::optional<TransportAdapter&> transport_;
   };
 
 public: // Exposed APIs
-
-
   /*
    */
-  template <typename Transport>
-  chunk_iterator<chunk_response_block<>, Transport>
-  chunk_iter(Transport& t)
+  chunk_iterator begin()
   {
-    return chunk_iterator<chunk_response_block<>, Transport>{chunk_resp_.get(), t};
-  }
- 
-  /*
-   */
-  template <typename Transport>
-  chunk_iterator<chunk_response_block<>, Transport>
-  chunk_end(Transport& t) const
-  {
-    return chunk_iterator<chunk_response_block<>, Transport>{true};
+    return chunk_iterator{crb_.get(), transport_.get()};
   }
 
   /*
    */
-  void set_chunked_response()
+  chunk_iterator end()
   {
-    chunk_resp_.emplace(in_place_construct_t{});
+    return chunk_iterator{true};
   }
 
-  chunk_response_block<>&
-  get_chunk_response_block()
+
+private: // Data Members (chunked_response)
+  ///
+  std::reference_wrapper<response> parent_resp_;
+  ///
+  std::reference_wrapper<TransportAdapter> transport_;
+  ///
+  boost::optional<chunk_response_block> crb_;
+};
+
+/*
+ */
+class response: 
+  public beast::http::response<beast::http::dynamic_body>
+{
+public: // 'tors
+  response() = default;
+  response(const response&) = delete;
+  response(response&&) = default;
+  response& operator=(const response&) = delete;
+  response& operator=(response&&) = default;
+
+public:
+  
+public: // Exposed APIs
+  /*
+   */
+  void set_chunked_response() noexcept
   {
-    return chunk_resp_.get();
+    has_chunked_response_ = true;
   }
 
   /*
    */
   bool has_chunked_response() const noexcept
   {
-    return !(!chunk_resp_);
+    return has_chunked_response_;
+  }
+
+  /*
+   */
+  template <typename Transport>
+  chunked_response<Transport, std::string>
+  chunk_response(Transport& transport)
+  {
+    BOOST_ASSERT_MSG(has_chunked_response(), 
+        "Response does not have any chunked body");
+    return chunked_response<Transport, std::string>{*this, transport};
   }
 
   /*
@@ -277,8 +323,10 @@ public: // Exposed APIs
   }
 
 private:
+  ///
   std::chrono::milliseconds elapsed_time_;
-  boost::optional<chunk_response_block<>> chunk_resp_;
+  ///
+  bool has_chunked_response_ = false;
 };
 
 

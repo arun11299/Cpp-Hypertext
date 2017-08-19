@@ -4,9 +4,9 @@
 namespace hypertext {
 namespace types {
 
-template <typename CBS>
-response::chunk_response_block<CBS>::
-chunk_response_block(in_place_construct_t)
+template <typename Transport, typename CBS>
+chunked_response<Transport, CBS>::
+chunk_response_block::chunk_response_block(in_place_construct_t)
 {
   //On Chunk header callback
   on_chunk_header_cb_ =
@@ -53,11 +53,10 @@ chunk_response_block(in_place_construct_t)
   parser_.on_chunk_body(on_chunk_body_cb_);
 }
 
-template <typename CBS>
-template <typename TransportAdapter>
+template <typename Transport, typename CBS>
 bool
-response::chunk_response_block<CBS>::
-fill_in_next_chunk(TransportAdapter& transport)
+chunked_response<Transport, CBS>::
+chunk_response_block::fill_in_next_chunk(Transport& transport)
 {
   //There is nothing more to parse
   if (parser_.is_done()) return false;
@@ -74,23 +73,23 @@ fill_in_next_chunk(TransportAdapter& transport)
 //////////////////////////////////////////////////////////////////////
 //   Chunk Iterator
 //////////////////////////////////////////////////////////////////////
-
-template <typename CRB, typename Transport>
-inline bool
-operator==(const response::chunk_iterator<CRB, Transport>& a,
-           const response::chunk_iterator<CRB, Transport>& b)
+/*
+template <typename Transport, typename CBS>
+bool
+operator==(const typename chunked_response<Transport, CBS>::chunk_iterator& a,
+           const typename chunked_response<Transport, CBS>::chunk_iterator& b)
 {
   return a.finished() == b.finished();
 }
 
-template <typename CRB, typename Transport>
-inline bool
-operator!=(const response::chunk_iterator<CRB, Transport>& a,
-           const response::chunk_iterator<CRB, Transport>& b)
+template <typename Transport, typename CBS>
+bool
+operator!=(const typename chunked_response<Transport, CBS>::chunk_iterator& a,
+           const typename chunked_response<Transport, CBS>::chunk_iterator& b)
 {
   return !(a == b);
 }
-
+*/
 
 //////////////////////////////////////////////////////////////////////
 //   Response API Implementation

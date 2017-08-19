@@ -26,6 +26,7 @@ void test_session_basic()
   }
   */
 
+  /*
   auto it = res.chunk_iter(sess.transport());
   auto it_end = res.chunk_end(sess.transport());
 
@@ -33,6 +34,10 @@ void test_session_basic()
     std::cout << *it << std::endl;
     ++it;
   }
+  */
+
+  auto cr = res.chunk_response(sess.transport());
+  for (auto v : cr) { std::cout << v << std::endl; }
 }
 
 
