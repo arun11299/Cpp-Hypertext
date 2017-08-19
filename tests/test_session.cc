@@ -15,11 +15,23 @@ void test_session_basic()
         url("127.0.0.1:8080"),
         stream(true)
       );
+
+  /*
+
   if (res.has_chunked_response()) {
     std::cout << "Response has chunked response\n";
     while (res.get_chunk_response_block().fill_in_next_chunk(sess.transport())) {
       std::cout << res.get_chunk_response_block().get_chunk_body() << std::endl;
     }
+  }
+  */
+
+  auto it = res.chunk_iter(sess.transport());
+  auto it_end = res.chunk_end(sess.transport());
+
+  while (it != it_end) {
+    std::cout << *it << std::endl;
+    ++it;
   }
 }
 

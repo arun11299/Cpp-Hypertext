@@ -1,5 +1,5 @@
-#ifndef CPP_HT_AUTH_HPP
-#define CPP_HT_AUTH_HPP
+#ifndef CPP_HT_AUTH_CONCEPT_HPP
+#define CPP_HT_AUTH_CONCEPT_HPP
 
 #include <memory>
 #include "hypertext/types.hpp"

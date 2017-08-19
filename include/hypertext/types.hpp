@@ -71,6 +71,9 @@ public:
   template <typename ChunkBodyStorage = std::string>
   class chunk_response_block
   {
+  public: //typedefs
+    using storage_type = ChunkBodyStorage;
+
   public: // 'tors
     chunk_response_block(in_place_construct_t);
     chunk_response_block(const chunk_response_block&) = delete;
@@ -101,6 +104,11 @@ public:
 
     /*
      */
+    ChunkBodyStorage&
+    get_storage() noexcept { return chunk_body_; }
+
+    /*
+     */
     template <typename TransportAdapter>
     bool fill_in_next_chunk(TransportAdapter& transport);
 
@@ -126,7 +134,121 @@ public:
              beast::error_code&)> on_chunk_body_cb_;
   };
 
+
+  /*
+   */
+  template <typename CRB, typename Transport>
+  class chunk_iterator
+  {
+  public: // iterator typedefs
+    using value_type = beast::string_view;
+    using pointer    = typename std::add_pointer<CRB>::type;
+    using reference  = typename std::add_lvalue_reference<CRB>::type;
+    using difference_type = size_t;
+    using iterator_category = std::input_iterator_tag;
+
+    /*
+     * https://stackoverflow.com/questions/35165828/how-to-implement-dereference-and-post-increment-for-input-iterator-in-c
+     */
+    class post_increment_proxy
+    {
+    public:
+      post_increment_proxy(const typename CRB::storage_type& s)
+        : value_(s)
+      {}
+      post_increment_proxy(const post_increment_proxy&) = default;
+      post_increment_proxy& operator=(const post_increment_proxy&) = default;
+
+    public:
+      typename CRB::storage_type&
+      operator*() const 
+      {
+        return value_;
+      }
+
+    private:
+      typename CRB::storage_type value_;
+    };
+
+  public: // 'tors
+    chunk_iterator(CRB& crb, Transport& transport)
+      : crb_ref_(crb)
+      , transport_(transport)
+    {}
+
+    chunk_iterator(bool finish)
+      : finished_(finish)
+    {}
+
+    chunk_iterator(const chunk_iterator&) = default;
+    chunk_iterator& operator=(const chunk_iterator&) = default;
+
+  public: // Input Iterator Requirements
+    /*
+     */
+    value_type operator*() const noexcept
+    {
+      return crb_ref_.get().get_chunk_body();
+    }
+
+    /*
+     */
+    pointer operator->() const noexcept
+    {
+      return &(crb_ref_.get());
+    }
+
+    /*
+     */
+    chunk_iterator& operator++() noexcept
+    {
+      finished_ = !(crb_ref_.get().fill_in_next_chunk(transport_.get()));
+      return *this;
+    }
+
+    /*
+     */
+    post_increment_proxy operator++(int) noexcept
+    {
+      post_increment_proxy result{crb_ref_.get().get_storage()};
+      finished_ = !(crb_ref_.get().fill_in_next_chunk(transport_.get()));
+      return result;
+    }
+
+    /*
+     */
+    bool finished() const noexcept { return finished_; }
+
+  private:
+    ///
+    bool finished_ = false;
+    ///
+    boost::optional<CRB&> crb_ref_;
+    ///
+    boost::optional<Transport&> transport_;
+  };
+
 public: // Exposed APIs
+
+
+  /*
+   */
+  template <typename Transport>
+  chunk_iterator<chunk_response_block<>, Transport>
+  chunk_iter(Transport& t)
+  {
+    return chunk_iterator<chunk_response_block<>, Transport>{chunk_resp_.get(), t};
+  }
+ 
+  /*
+   */
+  template <typename Transport>
+  chunk_iterator<chunk_response_block<>, Transport>
+  chunk_end(Transport& t) const
+  {
+    return chunk_iterator<chunk_response_block<>, Transport>{true};
+  }
+
   /*
    */
   void set_chunked_response()

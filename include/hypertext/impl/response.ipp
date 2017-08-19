@@ -71,7 +71,25 @@ fill_in_next_chunk(TransportAdapter& transport)
   return ec_ ? false : true;
 }
 
+//////////////////////////////////////////////////////////////////////
+//   Chunk Iterator
+//////////////////////////////////////////////////////////////////////
 
+template <typename CRB, typename Transport>
+inline bool
+operator==(const response::chunk_iterator<CRB, Transport>& a,
+           const response::chunk_iterator<CRB, Transport>& b)
+{
+  return a.finished() == b.finished();
+}
+
+template <typename CRB, typename Transport>
+inline bool
+operator!=(const response::chunk_iterator<CRB, Transport>& a,
+           const response::chunk_iterator<CRB, Transport>& b)
+{
+  return !(a == b);
+}
 
 
 //////////////////////////////////////////////////////////////////////
