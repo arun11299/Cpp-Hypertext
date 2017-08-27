@@ -6,7 +6,9 @@ namespace types {
 
 template <typename Transport, typename CBS>
 chunked_response<Transport, CBS>::
-chunk_response_block::chunk_response_block(in_place_construct_t)
+chunk_response_block::chunk_response_block(
+    std::reference_wrapper<response> resp)
+  : parent_resp_(resp)
 {
   //On Chunk header callback
   on_chunk_header_cb_ =
@@ -61,7 +63,15 @@ chunk_response_block::fill_in_next_chunk(Transport& transport)
   //There is nothing more to parse
   if (parser_.is_done()) return false;
 
+  bool read_header = (pbuf_.size() == 0);
+
   transport.read_next_chunked_body(pbuf_, parser_, ec_);
+
+  if (read_header) {
+    auto& parser_msg = parser_.get();
+    auto& header = parser_msg.base();
+    parent_resp_.get().header() = header;
+  }
 
   if (ec_ == beast::http::error::end_of_chunk) {
     return true;

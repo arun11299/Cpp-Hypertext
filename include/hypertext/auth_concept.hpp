@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "hypertext/types.hpp"
+#include "hypertext/type_traits.hpp"
 
 namespace hypertext {
 namespace auth {
@@ -16,6 +17,8 @@ public: // 'tors
   AuthConcept(T&& impl)
     : data_(std::make_shared<T>(std::forward<T>(impl)))
   {
+    static_assert(is_auth_concept<std::decay<T>::type>::value,
+        "T does not satisfy AuthConcept requirements.");
   }
 
 private:
@@ -26,6 +29,8 @@ private:
     virtual ~Concept() = default;
   };
 
+  /*
+   */
   template <typename T>
   struct Holder final: Concept
   {
@@ -34,7 +39,10 @@ private:
     Holder(T&& impl): auth_impl_(std::forward<T>(impl))
     {}
 
-    std::string encoded_str(types::request& req) override;
+    std::string encoded_str(types::request& req) override
+    {
+      return auth_impl_->encoded_str(req);
+    }
 
     held_type auth_impl_;
   };

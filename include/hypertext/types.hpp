@@ -20,7 +20,7 @@ namespace hypertext {
 namespace types {
 
 using request_header   = beast::http::request_header<>;
-using response_header  = beast::http::request_header<>;
+using response_header  = beast::http::response_header<>;
 using emptybody_parser = beast::http::parser<false, beast::http::empty_body>;
 
 struct in_place_construct_t {};
@@ -71,7 +71,7 @@ public: //'tors
     : parent_resp_(resp)
     , transport_(transport)
   {
-    crb_.emplace(in_place_construct_t{});
+    crb_.emplace(parent_resp_);
   }
 
   chunked_response(const chunked_response&) = delete;
@@ -89,7 +89,7 @@ public: // Internal classes
     using storage_type = ChunkBodyStore;
 
   public: // 'tors
-    chunk_response_block(in_place_construct_t);
+    chunk_response_block(std::reference_wrapper<response>);
     chunk_response_block(const chunk_response_block&) = delete;
     chunk_response_block(chunk_response_block&&) = default;
     chunk_response_block& operator=(const chunk_response_block&) = delete;
@@ -134,6 +134,9 @@ public: // Internal classes
     emptybody_parser parser_;
     /// The error code
     beast::error_code ec_;
+
+    /// The original response
+    std::reference_wrapper<response> parent_resp_;
 
     //Chunk decoding callbacks
     std::function<
@@ -275,6 +278,7 @@ private: // Data Members (chunked_response)
   boost::optional<chunk_response_block> crb_;
 };
 
+
 /*
  */
 class response: 
@@ -290,6 +294,20 @@ public: // 'tors
 public:
   
 public: // Exposed APIs
+  /*
+   */
+  const response_header& header() const noexcept
+  {
+    return (*this);
+  }
+
+  /*
+   */
+  response_header& header()
+  {
+    return (*this);
+  }
+
   /*
    */
   void set_chunked_response() noexcept

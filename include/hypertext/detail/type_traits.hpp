@@ -140,6 +140,25 @@ struct is_named_arg<T, void_t<
 {
 };
 
+
+/*
+ */
+template <typename T, typename=void>
+struct is_auth_concept: std::false_type
+{
+};
+
+template <typename T>
+struct is_auth_concept<T, void_t<
+                            decltype(
+                            std::declval<std::string&>() = 
+                                std::declval<T&>().encoded_str(std::declval<types::request&>()),
+                            (void)0)
+                          >
+                   >: std::true_type
+{
+};
+
 } // END namespace detail
 } // END namespace hypertext
 

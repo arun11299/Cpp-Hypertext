@@ -38,6 +38,10 @@ void test_session_basic()
 
   auto cr = res.chunk_response(sess.transport());
   for (auto v : cr) { std::cout << v << std::endl; }
+
+  for (auto& kv : res.header()) {
+    std::cout << kv.name_string() << std::endl;
+  }
 }
 
 
