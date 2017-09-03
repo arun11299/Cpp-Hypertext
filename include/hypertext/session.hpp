@@ -6,6 +6,7 @@
 #include "boost/asio.hpp"
 #include "boost/optional.hpp"
 
+#include "hypertext/url.hpp"
 #include "hypertext/types.hpp"
 #include "hypertext/parameters.hpp"
 
@@ -164,6 +165,9 @@ private:
 
   /// Default headers to be used for the session
   types::request_header headers_;
+
+  /// URL view. Constructed by move
+  hypertext::url::url_view url_view_;
 };
 
 } // END namespace hypertext

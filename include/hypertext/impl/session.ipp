@@ -29,7 +29,11 @@ types::response session<TransportAdapter>::request(Args&&... args)
 
   auto req = prepare_request(rparams);
 
-  return transport_.send(req, "127.0.0.1", 8080, 
+  hypertext::url::url_view uview{rparams.url.get()};
+  BOOST_ASSERT_MSG (uview.success(), "URL parsing failed");
+  url_view_ = std::move(uview);
+
+  return transport_.send(req, url_view_.host(), url_view_.port(), 
                          (rparams.stream ? *rparams.stream : false));
 }
 
