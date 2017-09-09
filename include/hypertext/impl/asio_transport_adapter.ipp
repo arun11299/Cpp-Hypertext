@@ -6,6 +6,11 @@
 #include "beast/http/read.hpp"
 #include "beast/http/write.hpp"
 
+#include <boost/asio/ssl.hpp>
+
+using tcp = boost::asio::ip::tcp;
+namespace ssl = boost::asio::ssl;
+
 namespace hypertext {
 namespace adapter {
 
@@ -38,6 +43,53 @@ types::response asio_transport::send(
   }
 
   return resp;
+}
+
+types::response asio_transport::send_secure(
+    const types::request& req,
+    beast::string_view    host,
+    uint16_t              port,
+    bool                  stream,
+    boost::optional<
+      boost::variant<std::string, bool>> verify)
+{
+  // Create the TCP connection
+  if (!is_connected()) {
+    connect_to_peer(host, port);
+    assert (is_connected());
+  }
+
+  boost::optional<std::string> cert_path;
+  boost::optional<bool> cert_ver;
+
+  if (verify) {
+    switch(verify.get().which()) {
+    case 0:
+      cert_path = boost::get<0>(verify.get());
+      break;
+    case 1:
+      cert_ver = boost::get<1>(verify.get());
+      break;
+    }
+  }
+
+  // Create the required ssl context
+  ssl::context ctx{ssl::context::sslv23_client};
+
+  // Wrap the now-connected socket in an SSL stream
+  ssl::stream<tcp::socket&> stream{sock_, ctx};
+
+  if (cert_ver && *cert_ver) {
+    stream.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
+  } else if (cert_ver && !*cert_ver){
+    stream.set_verify_mode(ssl::verify_none);
+  }
+
+  if (cert_path) {
+  }
+
+  // Perform SSL handshaking
+  stream.handshake(ssl::stream_base::client);
 }
 
 template <typename DynamicBuffer>

@@ -7,6 +7,8 @@
 #include "hypertext/version.hpp"
 #include "hypertext/type_traits.hpp"
 
+namespace urlp = hypertext::util::url_parser;
+
 namespace hypertext {
 
 template <typename TransportAdapter>
@@ -32,6 +34,12 @@ types::response session<TransportAdapter>::request(Args&&... args)
   hypertext::url::url_view uview{rparams.url.get()};
   BOOST_ASSERT_MSG (uview.success(), "URL parsing failed");
   url_view_ = std::move(uview);
+
+  if (url_view_.scheme() == urlp::Scheme::HTTPS) {
+    return transport_.send_secure(req, url_view_.host(), url_view_.port(),
+                                  (rparams.stream ? *rparams.stream : false),
+                                  rparams.verify);
+  }
 
   return transport_.send(req, url_view_.host(), url_view_.port(), 
                          (rparams.stream ? *rparams.stream : false));

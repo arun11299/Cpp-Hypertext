@@ -3,8 +3,11 @@
 
 #include <chrono>
 
+#include "boost/variant.hpp"
+
 #include "beast/http/verb.hpp"
 #include "beast/core/string.hpp"
+
 #include "hypertext/types.hpp"
 
 namespace hypertext {
@@ -81,6 +84,16 @@ struct stream_param
   bool stream_ = false;
 };
 
+struct verify_param
+{
+  verify_param(const std::string&);
+  verify_param(bool);
+
+  boost::variant<std::string, bool> get() const;
+
+  boost::variant<std::string, bool> verify_;
+};
+
 /// Parameter creators
 //-------------------------------
 
@@ -135,6 +148,16 @@ timeout(std::chrono::seconds);
  */
 stream_param
 stream(bool);
+
+/*
+ */
+verify_param
+verify(const std::string&);
+
+/*
+ */
+verify_param
+verify(bool);
 
 } // END namespace parameters
 } // END namespace hypertext

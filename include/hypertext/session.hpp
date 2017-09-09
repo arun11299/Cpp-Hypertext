@@ -99,6 +99,7 @@ private: // Private data structures
     boost::optional<types::request_header>     req_headers;
     boost::optional<std::chrono::milliseconds> timeout;
     boost::optional<bool>                      stream;
+    boost::optional<boost::variant<std::string, bool>> verify;
 
   private:
     template <typename... Args>
@@ -133,6 +134,13 @@ private: // Private data structures
     void set_param(parameters::stream_param&& s, Args&&... args)
     {
       stream = s.get();
+      set_param(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void set_param(parameters::verify_param&& v, Args&&... args)
+    {
+      verify = std::move(v.get());
       set_param(std::forward<Args>(args)...);
     }
 

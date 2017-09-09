@@ -59,6 +59,22 @@ bool stream_param::get() const noexcept
   return stream_;
 }
 
+verify_param::verify_param(const std::string& path)
+  : verify_(path)
+{
+}
+
+verify_param::verify_param(bool v)
+  : verify_(v)
+{
+}
+
+boost::variant<std::string, bool>
+verify_param::get() const
+{
+  return verify_;
+}
+
 // Parameter creator function implementation
 // --------------------------------------------------------------
 
@@ -135,6 +151,18 @@ stream_param
 stream(bool b)
 {
   return stream_param{b};
+}
+
+verify_param
+verify(const std::string& path)
+{
+  return verify_param{path};
+}
+
+verify_param
+verify(bool v)
+{
+  return verify_param{v};
 }
 
 namespace literals {

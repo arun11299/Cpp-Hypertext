@@ -42,6 +42,15 @@ public: // Exposed APIs
 
   /*
    */
+  types::response send_secure(const types::request& req,
+                              beast::string_view    host,
+                              uint16_t              port,
+                              bool                  stream,
+                              boost::optional<
+                                boost::variant<std::string, bool>> verify);
+
+  /*
+   */
   template <typename DynamicBuffer>
   void read_next_chunked_body(DynamicBuffer& buf, //parser buffer
                               types::emptybody_parser& p,
