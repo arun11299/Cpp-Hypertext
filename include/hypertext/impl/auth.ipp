@@ -9,7 +9,7 @@ namespace auth {
 std::string 
 HTTPBasicAuth::encoded_str(types::request& req)
 {
-  std::strin enc_str;
+  std::string enc_str;
   std::string combine;
   // Additional 1 for the colon(:)
   combine.reserve(username_.size() + password_.size() + 1);

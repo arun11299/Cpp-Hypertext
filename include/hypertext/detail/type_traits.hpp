@@ -109,11 +109,21 @@ struct is_transport_adapter: std::false_type
 template <typename T>
 struct is_transport_adapter<T, void_t<
                                 decltype(
+                                    // Send bytes without ssl
                                     std::declval<T&>().send(
                                       std::declval<const types::request&>(),
                                       std::declval<beast::string_view>(),
                                       std::declval<uint16_t>(),
                                       std::declval<bool>()),
+
+                                    // Send bytes with SSL
+                                    std::declval<T&>().send_secure(
+                                      std::declval<const types::request&>(),
+                                      std::declval<beast::string_view>(),
+                                      std::declval<uint16_t>(),
+                                      std::declval<bool>(),
+                                      std::declval<const boost::optional<boost::variant<std::string, bool>>&>(),
+                                      std::declval<const boost::optional<std::string>&>()),
 
                                     std::declval<T&>().close(),
                                     (void)0)

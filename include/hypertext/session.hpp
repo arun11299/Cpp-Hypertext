@@ -95,10 +95,11 @@ private: // Private data structures
     }
 
     boost::optional<beast::http::verb>         method;
-    boost::optional<beast::string_view>        url;
+    boost::optional<std::string>               url;
     boost::optional<types::request_header>     req_headers;
     boost::optional<std::chrono::milliseconds> timeout;
     boost::optional<bool>                      stream;
+    boost::optional<std::string>               cert_file;
     boost::optional<boost::variant<std::string, bool>> verify;
 
   private:
@@ -112,7 +113,7 @@ private: // Private data structures
     template <typename... Args>
     void set_param(parameters::url_param&& u, Args&&... args)
     {
-      url = u.get();
+      url = u.get().data();
       set_param(std::forward<Args>(args)...);
     }
 
@@ -141,6 +142,13 @@ private: // Private data structures
     void set_param(parameters::verify_param&& v, Args&&... args)
     {
       verify = std::move(v.get());
+      set_param(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void set_param(parameters::cert_param&& v, Args&&... args)
+    {
+      cert_file = std::move(v.get());
       set_param(std::forward<Args>(args)...);
     }
 

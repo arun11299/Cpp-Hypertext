@@ -22,9 +22,9 @@ headers_param::headers_param(types::request_header h)
 {
 }
 
-types::request_header headers_param::get()
+types::request_header& headers_param::get()
 {
-  return std::move(headers_);
+  return headers_;
 }
 
 template <typename AuthConceptT>
@@ -69,8 +69,8 @@ verify_param::verify_param(bool v)
 {
 }
 
-boost::variant<std::string, bool>
-verify_param::get() const
+boost::variant<std::string, bool>&
+verify_param::get() noexcept
 {
   return verify_;
 }
@@ -93,7 +93,7 @@ method(beast::string_view meth)
 url_param
 url(beast::string_view url)
 {
-  return url_param{url};
+  return url_param{url.data()};
 }
 
 headers_param
@@ -118,6 +118,7 @@ headers(HeaderConceptT&& hc)
 
   hypertext::types::request_header rheader;
 
+  //FIXME: This copies!
   for (auto elem : hc) {
     rheader.set(elem.first, elem.second);
   }
@@ -163,6 +164,12 @@ verify_param
 verify(bool v)
 {
   return verify_param{v};
+}
+
+cert_param
+cert(beast::string_view cert_file)
+{
+  return cert_param{cert_file.data()};
 }
 
 namespace literals {

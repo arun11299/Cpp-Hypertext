@@ -38,7 +38,8 @@ types::response session<TransportAdapter>::request(Args&&... args)
   if (url_view_.scheme() == urlp::Scheme::HTTPS) {
     return transport_.send_secure(req, url_view_.host(), url_view_.port(),
                                   (rparams.stream ? *rparams.stream : false),
-                                  rparams.verify);
+                                  rparams.verify,
+                                  rparams.cert_file);
   }
 
   return transport_.send(req, url_view_.host(), url_view_.port(), 

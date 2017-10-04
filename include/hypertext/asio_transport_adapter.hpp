@@ -46,8 +46,9 @@ public: // Exposed APIs
                               beast::string_view    host,
                               uint16_t              port,
                               bool                  stream,
-                              boost::optional<
-                                boost::variant<std::string, bool>> verify);
+                              const boost::optional<
+                                boost::variant<std::string, bool>>& verify,
+                              const boost::optional<std::string>& cert_file);
 
   /*
    */
@@ -62,6 +63,13 @@ public: // Exposed APIs
 
 
 private: // Private implementation details
+  /*
+   */
+  template <typename StreamObject>
+  types::response send_impl(StreamObject&         sobj,
+                            const types::request& req,
+                            bool                  stream);
+
   /*
    */
   void connect_to_peer(beast::string_view host,

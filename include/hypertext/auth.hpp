@@ -19,8 +19,10 @@ public: // 'tors
     : username_(username)
     , password_(password)
   {}
+
   HTTPBasicAuth(const HTTPBasicAuth&) = default;
   HTTPBasicAuth& operator=(const HTTPBasicAuth&) = default;
+
   ~HTTPBasicAuth() = default;
 
 public: // Exposed APIs

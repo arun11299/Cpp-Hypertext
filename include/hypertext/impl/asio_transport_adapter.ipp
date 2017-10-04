@@ -2,6 +2,7 @@
 #define CPP_HT_IMPL_ASIO_TRANSPORT_ADAPTER_IPP
 
 #include <system_error>
+#include <fstream>
 
 #include "beast/http/read.hpp"
 #include "beast/http/write.hpp"
@@ -30,19 +31,7 @@ types::response asio_transport::send(
     assert (is_connected());
   }
 
-  beast::http::write(sock_, req);
-
-  beast::flat_buffer buf;
-  types::response resp;
-
-  if (!stream) {
-    beast::http::read(sock_, buf, resp);
-  } else {
-    //Set the chunk response handler
-    resp.set_chunked_response();
-  }
-
-  return resp;
+  return send_impl(sock_, req, stream);
 }
 
 types::response asio_transport::send_secure(
@@ -50,8 +39,9 @@ types::response asio_transport::send_secure(
     beast::string_view    host,
     uint16_t              port,
     bool                  stream,
-    boost::optional<
-      boost::variant<std::string, bool>> verify)
+    const boost::optional<
+      boost::variant<std::string, bool>>& verify,
+    const boost::optional<std::string>& cert_file)
 {
   // Create the TCP connection
   if (!is_connected()) {
@@ -65,10 +55,10 @@ types::response asio_transport::send_secure(
   if (verify) {
     switch(verify.get().which()) {
     case 0:
-      cert_path = boost::get<0>(verify.get());
+      cert_path = boost::get<std::string>(verify.get());
       break;
     case 1:
-      cert_ver = boost::get<1>(verify.get());
+      cert_ver = boost::get<bool>(verify.get());
       break;
     }
   }
@@ -76,20 +66,57 @@ types::response asio_transport::send_secure(
   // Create the required ssl context
   ssl::context ctx{ssl::context::sslv23_client};
 
-  // Wrap the now-connected socket in an SSL stream
-  ssl::stream<tcp::socket&> stream{sock_, ctx};
+  // Wrap the now-connected socket in an SSL ssl_stream
+  ssl::stream<tcp::socket&> ssl_stream{sock_, ctx};
 
   if (cert_ver && *cert_ver) {
-    stream.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
+    ssl_stream.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
   } else if (cert_ver && !*cert_ver){
-    stream.set_verify_mode(ssl::verify_none);
+    ssl_stream.set_verify_mode(ssl::verify_none);
   }
 
-  if (cert_path) {
+  if (cert_file) {
+    //TODO:
+    //FIXME: Need to cache it per session ?
+    const std::string& file = cert_file.get();
+    std::ifstream in{file};
+
+    std::string data{std::istream_iterator<char>(in), {}};
+
+    boost::system::error_code ec;
+    ctx.add_certificate_authority(
+        boost::asio::buffer(data.c_str(), data.length()), ec);
+
+    if (ec) {
+      throw "Exception";
+    }
   }
 
   // Perform SSL handshaking
-  stream.handshake(ssl::stream_base::client);
+  ssl_stream.handshake(ssl::stream_base::client);
+
+  return send_impl(ssl_stream, req, stream);
+}
+
+template <typename StreamObject>
+types::response asio_transport::send_impl(
+    StreamObject& sobj,
+    const types::request& req,
+    bool stream)
+{
+  beast::http::write(sock_, req);
+  
+  beast::flat_buffer buf;
+  types::response resp;
+ 
+  if (!stream) {
+    beast::http::read(sock_, buf, resp);
+  } else {
+    //Set the chunk response handler
+    resp.set_chunked_response();
+  }
+ 
+  return resp;
 }
 
 template <typename DynamicBuffer>

@@ -37,6 +37,14 @@ struct timeout_param;
 /// Option to enable streaming download
 struct stream_param;
 
+/// Either a bool, in which case it controls whether
+/// we verify the server's TLS certificate or a string
+/// in which case it must point to a CA bundle.
+struct verify_param;
+
+/// Option to provide the SSL client cert file (.pem)
+struct cert_param;
+
 /// Method Parameter Definitions
 //------------------------------
 
@@ -50,13 +58,13 @@ struct method_param
 struct url_param
 {
   beast::string_view get() const noexcept;
-  beast::string_view url_;
+  std::string url_;
 };
 
 struct headers_param
 {
   headers_param(types::request_header);
-  types::request_header get();
+  types::request_header& get();
 
   types::request_header headers_;
 };
@@ -89,9 +97,15 @@ struct verify_param
   verify_param(const std::string&);
   verify_param(bool);
 
-  boost::variant<std::string, bool> get() const;
+  boost::variant<std::string, bool>& get() noexcept;
 
   boost::variant<std::string, bool> verify_;
+};
+
+struct cert_param
+{
+  beast::string_view get() const noexcept;
+  std::string cert_;
 };
 
 /// Parameter creators
@@ -158,6 +172,11 @@ verify(const std::string&);
  */
 verify_param
 verify(bool);
+
+/*
+ */
+cert_param
+cert(beast::string_view cert);
 
 } // END namespace parameters
 } // END namespace hypertext

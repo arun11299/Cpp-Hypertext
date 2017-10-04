@@ -1,2 +1,4 @@
 /Users/amuralid/dev_test/cpp-hypertext/include
 g++ -std=c++14 -I /Users/amuralid/dev_test/cpp-hypertext/include -I /Users/amuralid/Beast-master/include  -o test_params test_params.cc -l boost_system-mt
+
+g++ -std=c++14 -I /Users/amuralid/dev_test/cpp-hypertext/include -I /Users/amuralid/Beast-master/include  -o test_session test_session.cc  -l boost_system-mt -L /usr/local/Cellar//openssl/1.0.2j/lib/  -lssl -lcrypto -o md5
