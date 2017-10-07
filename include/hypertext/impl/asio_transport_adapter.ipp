@@ -3,14 +3,17 @@
 
 #include <system_error>
 #include <fstream>
+#include <exception>
 
 #include "beast/http/read.hpp"
 #include "beast/http/write.hpp"
 
 #include <boost/asio/ssl.hpp>
+#include <boost/filesystem.hpp>
 
 using tcp = boost::asio::ip::tcp;
 namespace ssl = boost::asio::ssl;
+namespace fs = boost::filesystem;
 
 namespace hypertext {
 namespace adapter {
@@ -75,11 +78,24 @@ types::response asio_transport::send_secure(
     ssl_stream.set_verify_mode(ssl::verify_none);
   }
 
+  if (cert_path) {
+    if (fs::is_regular_file(*cert_path)) {
+      ctx.load_verify_file(*cert_path);
+    } else {
+      //FIXME
+      //ctx.load_verify_path(*cert_path);
+    }
+    ssl_stream.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
+  }
+
   if (cert_file) {
     //TODO:
     //FIXME: Need to cache it per session ?
     const std::string& file = cert_file.get();
     std::ifstream in{file};
+
+    //FIXME: cert_file could be path to CA BUNDLE
+    //or a cert file
 
     std::string data{std::istream_iterator<char>(in), {}};
 
@@ -104,13 +120,13 @@ types::response asio_transport::send_impl(
     const types::request& req,
     bool stream)
 {
-  beast::http::write(sock_, req);
-  
+  beast::http::write(sobj, req);
+
   beast::flat_buffer buf;
   types::response resp;
  
   if (!stream) {
-    beast::http::read(sock_, buf, resp);
+    beast::http::read(sobj, buf, resp);
   } else {
     //Set the chunk response handler
     resp.set_chunked_response();

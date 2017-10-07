@@ -70,7 +70,7 @@ prepare_request(const request_parameters& p)
   }
 
   // TODO: Fill it up at a proper place
-  //headers_.insert(beast::http::field::host, "www.example.com:80");
+  headers_.insert(beast::http::field::host, "www.github.com");
 
   // copy the headers
   static_cast<types::request_header&>(request) = headers_;
