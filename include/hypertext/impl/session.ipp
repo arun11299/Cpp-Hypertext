@@ -1,5 +1,6 @@
 #ifndef CPP_HT_IMPL_SESSION_IPP
 #define CPP_HT_IMPL_SESSION_IPP
+#include <iostream>
 
 #include "beast/http/field.hpp"
 #include "beast/http/fields.hpp"
@@ -29,11 +30,13 @@ types::response session<TransportAdapter>::request(Args&&... args)
 
   request_parameters rparams{std::forward<Args>(args)...};
 
-  auto req = prepare_request(rparams);
-
   hypertext::url::url_view uview{rparams.url.get()};
   BOOST_ASSERT_MSG (uview.success(), "URL parsing failed");
   url_view_ = std::move(uview);
+
+  auto req = prepare_request(rparams);
+
+  std::cout << req << std::endl;
 
   if (url_view_.scheme() == urlp::Scheme::HTTPS) {
     return transport_.send_secure(req, url_view_.host(), url_view_.port(),
@@ -57,7 +60,7 @@ void session<TransportAdapter>::fill_default_headers()
 
 template <typename TransportAdapter>
 types::request session<TransportAdapter>::
-prepare_request(const request_parameters& p)
+prepare_request(request_parameters& p)
 {
   types::request request;
   assert (p.method);
@@ -69,8 +72,13 @@ prepare_request(const request_parameters& p)
     }
   }
 
-  // TODO: Fill it up at a proper place
-  headers_.insert(beast::http::field::host, "www.github.com");
+  headers_.insert(beast::http::field::host, url_view_.host());
+
+  //Add the authorization field
+  if (p.auth) {
+    headers_.insert(beast::http::field::authorization, 
+                    p.auth.get().get_encoded_str(request));
+  }
 
   // copy the headers
   static_cast<types::request_header&>(request) = headers_;

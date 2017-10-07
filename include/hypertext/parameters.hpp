@@ -9,6 +9,7 @@
 #include "beast/core/string.hpp"
 
 #include "hypertext/types.hpp"
+#include "hypertext/auth_concept.hpp"
 
 namespace hypertext {
 namespace parameters {
@@ -28,7 +29,6 @@ struct params_param;
 struct headers_param;
 
 /// The Authorization field.
-template <typename AuthConcept>
 struct auth_param;
 
 /// How many milli-seconds to wait for the server to send response.
@@ -44,6 +44,7 @@ struct verify_param;
 
 /// Option to provide the SSL client cert file (.pem)
 struct cert_param;
+
 
 /// Method Parameter Definitions
 //------------------------------
@@ -69,13 +70,12 @@ struct headers_param
   types::request_header headers_;
 };
 
-template <typename AuthConceptT>
 struct auth_param
 {
-  auth_param(AuthConceptT&&);
-  AuthConceptT get();
+  auth_param(auth::AuthConcept);
+  auth::AuthConcept& get();
 
-  AuthConceptT auth_;
+  auth::AuthConcept auth_;
 };
 
 struct timeout_param
@@ -142,11 +142,17 @@ headers(HeaderConceptT&&);
 
 /*
  */
-template <typename AuthConceptT>
-auth_param<typename std::decay<AuthConceptT>::type> 
-auth(AuthConceptT&&);
+template <typename AuthT>
+auth_param 
+auth(AuthT&& auth);
 
-//TODO: Provide a default for HTTPBasicAuth
+/*
+ * Uses HTTPBasicAuth.
+ * Only offers a syntactical advantage if the
+ * user wants to use Basic Authentication.
+ */
+auth_param
+auth(std::pair<std::string, std::string> creds);
 
 /*
  */

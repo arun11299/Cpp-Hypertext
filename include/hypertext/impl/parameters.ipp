@@ -27,16 +27,14 @@ types::request_header& headers_param::get()
   return headers_;
 }
 
-template <typename AuthConceptT>
-auth_param<AuthConceptT>::auth_param(AuthConceptT&& ac)
-  : auth_(std::forward<AuthConceptT>(ac))
+auth_param::auth_param(auth::AuthConcept ac)
+  : auth_(std::move(ac))
 {
 }
 
-template <typename AuthConceptT>
-AuthConceptT auth_param<AuthConceptT>::get()
+auth::AuthConcept& auth_param::get()
 {
-  return std::move(auth_);
+  return auth_;
 }
 
 timeout_param::timeout_param(std::chrono::milliseconds s)
@@ -127,13 +125,13 @@ headers(HeaderConceptT&& hc)
 }
 
 template <typename AuthConceptT>
-auth_param<typename std::decay<AuthConceptT>::type>
+auth_param
 auth(AuthConceptT&& ac)
 {
-  static_assert(is_authorization<typename std::decay<AuthConceptT>::type>{},
+  static_assert(is_auth_concept<std::decay_t<AuthConceptT>>{},
       "Type does not match the requirements for authorization");
 
-  return auth_param<typename std::decay<AuthConceptT>::type>{std::forward<AuthConceptT>(ac)};
+  return auth_param{auth::AuthConcept{std::forward<AuthConceptT>(ac)}};
 }
 
 timeout_param

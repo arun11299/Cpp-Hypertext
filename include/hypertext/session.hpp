@@ -9,6 +9,7 @@
 #include "hypertext/url.hpp"
 #include "hypertext/types.hpp"
 #include "hypertext/parameters.hpp"
+#include "hypertext/auth_concept.hpp"
 
 namespace hypertext {
 
@@ -96,6 +97,7 @@ private: // Private data structures
 
     boost::optional<beast::http::verb>         method;
     boost::optional<std::string>               url;
+    boost::optional<auth::AuthConcept>         auth;
     boost::optional<types::request_header>     req_headers;
     boost::optional<std::chrono::milliseconds> timeout;
     boost::optional<bool>                      stream;
@@ -114,6 +116,17 @@ private: // Private data structures
     void set_param(parameters::url_param&& u, Args&&... args)
     {
       url = u.get().data();
+      set_param(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void set_param(parameters::auth_param&& a, Args&&... args)
+    {
+      //TODO: FIXME Shared pointer copy
+      // Should I make it efficient by moving it ?
+      // Do I care that much ?
+      // No. For now.
+      auth = a.get();
       set_param(std::forward<Args>(args)...);
     }
 
@@ -165,7 +178,7 @@ private: // Private implementations
 
   /*
    */
-  types::request prepare_request(const request_parameters&);
+  types::request prepare_request(request_parameters&);
 
 private:
   /// The underlying transport mechanism
