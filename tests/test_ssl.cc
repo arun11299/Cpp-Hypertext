@@ -16,7 +16,7 @@ void test_ssl_basic()
         verify(true)
       );
 
-  for (auto& kv : res.header()) {
+  for (auto& kv : res.response.header()) {
     std::cout << kv.name_string() << std::endl;
   }
 }
