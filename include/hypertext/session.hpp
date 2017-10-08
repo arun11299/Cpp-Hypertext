@@ -14,6 +14,15 @@
 namespace hypertext {
 
 /*
+ * @class: result_type
+ */
+struct result_type
+{
+  types::response response;
+  unsigned status_code;
+};
+
+/*
  * @class: Session
  * @brief: 
  * @detail:
@@ -41,17 +50,17 @@ public: // Exposed APIs
   /*
    */
   template <typename... Args>
-  types::response request(Args&&... args);
+  types::result_type request(Args&&... args);
 
   /*
    */
   template <typename... Args>
-  types::response get(Args&&... args);
+  types::result_type get(Args&&... args);
 
   /*
    */
   template <typename... Args>
-  types::response post(Args&&... args);
+  types::result_type post(Args&&... args);
 
   /*
    */

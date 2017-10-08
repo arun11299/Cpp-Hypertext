@@ -27,6 +27,8 @@ struct in_place_construct_t {};
 
 //Fwd Decl
 class response;
+struct result_type;
+
 
 /*
  */
@@ -310,6 +312,13 @@ public: // Exposed APIs
 
   /*
    */
+  unsigned status_code()
+  {
+    return static_cast<unsigned>(result());
+  }
+
+  /*
+   */
   void set_chunked_response() noexcept
   {
     has_chunked_response_ = true;
@@ -347,6 +356,14 @@ private:
   bool has_chunked_response_ = false;
 };
 
+
+/*
+ */
+struct result_type
+{
+  response response;
+  unsigned status_code;
+};
 
 } // END namespace hypertext
 } // END namespace hypertext

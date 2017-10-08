@@ -23,7 +23,7 @@ asio_transport::asio_transport()
 {
 }
 
-types::response asio_transport::send(
+types::result_type asio_transport::send(
     const types::request& req,
     beast::string_view    host,
     uint16_t              port,
@@ -34,10 +34,12 @@ types::response asio_transport::send(
     assert (is_connected());
   }
 
-  return send_impl(sock_, req, stream);
+  auto response = send_impl(sock_, req, stream);
+
+  return {std::move(response), response.status_code()};
 }
 
-types::response asio_transport::send_secure(
+types::result_type asio_transport::send_secure(
     const types::request& req,
     beast::string_view    host,
     uint16_t              port,
@@ -111,7 +113,9 @@ types::response asio_transport::send_secure(
   // Perform SSL handshaking
   ssl_stream.handshake(ssl::stream_base::client);
 
-  return send_impl(ssl_stream, req, stream);
+  auto response = send_impl(ssl_stream, req, stream);
+
+  return {std::move(response), response.status_code()};
 }
 
 template <typename StreamObject>

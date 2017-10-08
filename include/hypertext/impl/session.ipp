@@ -1,6 +1,5 @@
 #ifndef CPP_HT_IMPL_SESSION_IPP
 #define CPP_HT_IMPL_SESSION_IPP
-#include <iostream>
 
 #include "beast/http/field.hpp"
 #include "beast/http/fields.hpp"
@@ -23,7 +22,7 @@ session<TransportAdapter>::session()
 
 template <typename TransportAdapter>
 template <typename... Args>
-types::response session<TransportAdapter>::request(Args&&... args)
+types::result_type session<TransportAdapter>::request(Args&&... args)
 {
   static_assert(are_parameters<Args...>{},
       "Not all arguments passed models Parameter concept");
@@ -35,8 +34,6 @@ types::response session<TransportAdapter>::request(Args&&... args)
   url_view_ = std::move(uview);
 
   auto req = prepare_request(rparams);
-
-  std::cout << req << std::endl;
 
   if (url_view_.scheme() == urlp::Scheme::HTTPS) {
     return transport_.send_secure(req, url_view_.host(), url_view_.port(),

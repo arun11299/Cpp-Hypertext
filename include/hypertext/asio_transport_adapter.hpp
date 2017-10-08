@@ -35,20 +35,20 @@ public: // Exposed APIs
 
   /*
    */
-  types::response send(const types::request& req,
-                       beast::string_view    host, 
-                       uint16_t              port,
-                       bool                  stream);
+  types::result_type send(const types::request& req,
+                          beast::string_view    host, 
+                          uint16_t              port,
+                          bool                  stream);
 
   /*
    */
-  types::response send_secure(const types::request& req,
-                              beast::string_view    host,
-                              uint16_t              port,
-                              bool                  stream,
-                              const boost::optional<
-                                boost::variant<std::string, bool>>& verify,
-                              const boost::optional<std::string>& cert_file);
+  types::result_type send_secure(const types::request& req,
+                                 beast::string_view    host,
+                                 uint16_t              port,
+                                 bool                  stream,
+                                 const boost::optional<
+                                    boost::variant<std::string, bool>>& verify,
+                                 const boost::optional<std::string>& cert_file);
 
   /*
    */

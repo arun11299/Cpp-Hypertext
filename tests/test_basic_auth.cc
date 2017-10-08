@@ -14,13 +14,13 @@ void test_basic_auth()
   auto res = sess.request(
         method("GET"),
         url("https://api.github.com/user"),
-        auth(ht::auth::HTTPBasicAuth{"arun11299", "sharpbrain99211"}),
+        auth(ht::auth::HTTPBasicAuth{"arun11299", "xxxxxx"}),
         verify(false)
       );
 
-  std::cout << "Status : " << res.result() << std::endl;
+  std::cout << "Status : " << res.status_code << std::endl;
 
-  for (auto& kv : res.header()) {
+  for (auto& kv : res.response.header()) {
     std::cout << kv.name_string() << std::endl;
   }
 }

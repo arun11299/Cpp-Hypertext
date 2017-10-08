@@ -5,7 +5,6 @@
 #include "hypertext/utils/ct_string.hpp"
 
 #include "beast/core/detail/base64.hpp"
-#include <iostream>
 
 namespace hypertext {
 namespace auth {
@@ -27,8 +26,6 @@ HTTPBasicAuth::encoded_str(types::request& req)
   //Encode
   size_t wr = beast::detail::base64::encode(
       &enc_str[0], &combine[0], combine.length());
-
-  std::cout << enc_str << std::endl;
 
   return "Basic " + enc_str;
 }
