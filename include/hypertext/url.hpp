@@ -75,6 +75,14 @@ public: //Exposed APIs
     BOOST_ASSERT_MSG(0, "CODE NOT REACHED");
   }
 
+  /*
+   */
+  beast::string_view target() const
+  {
+    return ast_url_.target_path_;
+  }
+
+
 private:
   /// The URL provided by the caller
   std::string url_;

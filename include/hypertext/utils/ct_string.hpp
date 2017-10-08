@@ -4,6 +4,10 @@
 #include <type_traits>
 #include "hypertext/type_traits.hpp"
 
+/// ATTN: This is mostly incomplete.
+// Have not been actually able to make use of it till now.
+// TODO: Consider removing it.
+
 namespace hypertext {
 namespace util {
 

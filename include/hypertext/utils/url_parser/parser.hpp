@@ -49,6 +49,7 @@ struct url
 {
   Scheme scheme_;
   host_name hostname_;
+  std::string target_path_;
 };
 
 } // END namespace ast
@@ -117,7 +118,9 @@ namespace grammar {
   //TODO: IPV6 address
   const auto hostname_def = (domain | ipv4_address) >> -( ':' > short_ );
 
-  const auto url_def = scheme >> lit("://") >> hostname;
+  auto target_path = as<std::string>(*char_);
+
+  const auto url_def = scheme >> lit("://") >> hostname >> -target_path;
 
   BOOST_SPIRIT_DEFINE (url);
   BOOST_SPIRIT_DEFINE (scheme);
@@ -137,5 +140,6 @@ BOOST_FUSION_ADAPT_STRUCT(
 BOOST_FUSION_ADAPT_STRUCT(
   hypertext::util::url_parser::ast::url,
   (hypertext::util::url_parser::Scheme, scheme_),
-  (hypertext::util::url_parser::ast::host_name, hostname_)
+  (hypertext::util::url_parser::ast::host_name, hostname_),
+  (std::string, target_path_)
 );

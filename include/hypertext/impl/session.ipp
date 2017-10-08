@@ -47,6 +47,13 @@ types::result_type session<TransportAdapter>::request(Args&&... args)
 }
 
 template <typename TransportAdapter>
+template <typename... Args>
+types::result_type session<TransportAdapter>::get(Args&&... args)
+{
+  return request(parameters::method("GET"), std::forward<Args>(args)...);
+}
+
+template <typename TransportAdapter>
 void session<TransportAdapter>::fill_default_headers()
 {
   headers_.insert(beast::http::field::user_agent, "cpp-ht-requests");
@@ -81,7 +88,7 @@ prepare_request(request_parameters& p)
   static_cast<types::request_header&>(request) = headers_;
 
   request.method(*(p.method));
-  request.target("/");
+  request.target(url_view_.target());
   request.version = 11;
 
   request.prepare_payload();

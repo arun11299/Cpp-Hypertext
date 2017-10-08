@@ -14,15 +14,6 @@
 namespace hypertext {
 
 /*
- * @class: result_type
- */
-struct result_type
-{
-  types::response response;
-  unsigned status_code;
-};
-
-/*
  * @class: Session
  * @brief: 
  * @detail:
@@ -142,6 +133,7 @@ private: // Private data structures
     template <typename... Args>
     void set_param(parameters::headers_param&& h, Args&&... args)
     {
+      //ATTN: Keep the move here.
       req_headers = std::move(h.get());
       set_param(std::forward<Args>(args)...);
     }
@@ -163,14 +155,14 @@ private: // Private data structures
     template <typename... Args>
     void set_param(parameters::verify_param&& v, Args&&... args)
     {
-      verify = std::move(v.get());
+      verify = v.get();
       set_param(std::forward<Args>(args)...);
     }
 
     template <typename... Args>
     void set_param(parameters::cert_param&& v, Args&&... args)
     {
-      cert_file = std::move(v.get());
+      cert_file = v.get();
       set_param(std::forward<Args>(args)...);
     }
 

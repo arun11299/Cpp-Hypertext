@@ -91,23 +91,16 @@ types::result_type asio_transport::send_secure(
   }
 
   if (cert_file) {
-    //TODO:
-    //FIXME: Need to cache it per session ?
-    const std::string& file = cert_file.get();
-    std::ifstream in{file};
-
-    //FIXME: cert_file could be path to CA BUNDLE
-    //or a cert file
-
-    std::string data{std::istream_iterator<char>(in), {}};
-
     boost::system::error_code ec;
-    ctx.add_certificate_authority(
-        boost::asio::buffer(data.c_str(), data.length()), ec);
 
-    if (ec) {
-      throw "Exception";
+    if (fs::is_regular_file(*cert_file)) {
+      boost::system::error_code ec;
+      ctx.use_certificate_file(*cert_file, boost::asio::ssl::context::pem, ec);
+    } else {
+      //TODO: FIXME
     }
+
+    if (ec) throw "Exception";
   }
 
   // Perform SSL handshaking
