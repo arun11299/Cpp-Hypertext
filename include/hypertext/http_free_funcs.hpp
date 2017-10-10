@@ -14,9 +14,6 @@ template <typename TransportAdapter = adapter::asio_transport,
           typename... Args>
 types::result_type get(Args&&... args)
 {
-  static_assert(are_parameters<Args...>{}, 
-      "Not all arguments passed models Parameter concept");
-
   session<TransportAdapter> sess;
   return sess.get(std::forward<Args>(args)...);
 }

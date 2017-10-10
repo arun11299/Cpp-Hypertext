@@ -73,6 +73,18 @@ verify_param::get() noexcept
   return verify_;
 }
 
+params_param::params_param(
+    std::map<std::string, std::string>&& m)
+  : params_(std::move(m))
+{
+}
+
+std::map<std::string, std::string>&
+params_param::get()
+{
+  return params_;
+}
+
 // Parameter creator function implementation
 // --------------------------------------------------------------
 
@@ -168,6 +180,38 @@ cert_param
 cert(beast::string_view cert_file)
 {
   return cert_param{cert_file.data()};
+}
+
+
+params_param
+params(
+    const std::initializer_list<
+            std::pair<beast::string_view, beast::string_view>
+          >& kv)
+{
+  std::map<std::string, std::string> m;
+
+  for (auto elem : kv) {
+    m.emplace(elem.first.data(), elem.second.data());
+  }
+
+  return params_param{std::move(m)};
+}
+
+template <typename HeaderConceptT>
+params_param
+params(HeaderConceptT&& hc)
+{
+  static_assert(is_header_compatible<typename std::decay<HeaderConceptT>::type>{},
+      "Type does not match the requirements for a header dictionary");
+
+  std::map<std::string, std::string> m;
+
+  for (auto& elem : hc) {
+    m.emplace(elem.first, elem.second);
+  }
+
+  return params_param{std::move(m)};
 }
 
 namespace literals {

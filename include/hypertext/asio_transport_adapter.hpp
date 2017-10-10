@@ -16,7 +16,7 @@ public: // 'tors
   asio_transport();
   asio_transport(const asio_transport&) = delete;
   asio_transport& operator=(const asio_transport&) = delete;
-  ~asio_transport() = default;
+  ~asio_transport();
 
 public: // Exposed APIs
   /*

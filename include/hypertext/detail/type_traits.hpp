@@ -67,6 +67,12 @@ struct is_header_compatible<T, void_t<
                                   std::is_constructible<beast::string_view, typename T::key_type>::value,
                                   void
                                 >::type,
+
+                                typename std::enable_if<
+                                  std::is_constructible<beast::string_view, typename T::mapped_type>::value,
+                                  void
+                                >::type,
+
                                 decltype(
                                     //TODO: Improve the traits check
                                     std::declval<T&>().operator[](std::declval<const typename T::key_type&>()),
@@ -90,7 +96,7 @@ struct is_authorization: std::false_type
 template <typename T>
 struct is_authorization<T, void_t<
                             decltype(
-                              std::declval<std::string>() = std::declval<T&>.operator()(),
+                              std::declval<std::string>() = std::declval<T&>(),
                               (void)0)
                            >
                        >: std::true_type

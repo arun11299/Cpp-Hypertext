@@ -23,6 +23,12 @@ asio_transport::asio_transport()
 {
 }
 
+asio_transport::~asio_transport()
+{
+  beast::error_code ec;
+  sock_.shutdown(tcp::socket::shutdown_both, ec);
+}
+
 types::result_type asio_transport::send(
     const types::request& req,
     beast::string_view    host,

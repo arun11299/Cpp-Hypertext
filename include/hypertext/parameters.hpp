@@ -1,6 +1,7 @@
 #ifndef CPP_HT_PARAMTERS_HPP
 #define CPP_HT_PARAMTERS_HPP
 
+#include <map>
 #include <chrono>
 
 #include "boost/variant.hpp"
@@ -45,6 +46,9 @@ struct verify_param;
 /// Option to provide the SSL client cert file (.pem)
 struct cert_param;
 
+/// HTTP query string parameters
+struct params_param; 
+
 
 /// Method Parameter Definitions
 //------------------------------
@@ -68,6 +72,16 @@ struct headers_param
   types::request_header& get();
 
   types::request_header headers_;
+};
+
+struct params_param
+{
+  params_param(std::map<std::string, std::string>&&);
+
+  std::map<std::string, std::string>& get();
+
+  //TODO: FIXME: I do not like this. Should be more generic
+  std::map<std::string, std::string> params_;
 };
 
 struct auth_param
@@ -183,6 +197,20 @@ verify(bool);
  */
 cert_param
 cert(beast::string_view cert);
+
+/*
+ */
+params_param
+params(
+    const std::initializer_list<
+            std::pair<beast::string_view, beast::string_view>
+          >&);
+
+/*
+ */
+template <typename HeaderConceptT>
+params_param
+params(HeaderConceptT&&);
 
 } // END namespace parameters
 } // END namespace hypertext

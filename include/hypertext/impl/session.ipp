@@ -84,11 +84,18 @@ prepare_request(request_parameters& p)
                     p.auth.get().get_encoded_str(request));
   }
 
+  //TODO: FIXME Optimize this
+  std::string path = url_view_.target().data();
+  if (p.params) {
+    if (path.back() == '/') path.pop_back();
+    path += url_view_.build_query_string(*p.params);
+  }
+
   // copy the headers
   static_cast<types::request_header&>(request) = headers_;
 
   request.method(*(p.method));
-  request.target(url_view_.target());
+  request.target(path);
   request.version = 11;
 
   request.prepare_payload();

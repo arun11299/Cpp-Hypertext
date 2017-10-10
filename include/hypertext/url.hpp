@@ -82,6 +82,21 @@ public: //Exposed APIs
     return ast_url_.target_path_;
   }
 
+  /*
+   */
+  std::string build_query_string(
+      const std::map<std::string, std::string>& params) const
+  {
+    if (!params.size()) return {};
+    std::string query{'?'};
+
+    for (const auto& p : params) {
+      query += (p.first + '=' + p.second + '&');
+    }
+
+    return query.substr(0, query.length() - 1);
+  }
+
 
 private:
   /// The URL provided by the caller

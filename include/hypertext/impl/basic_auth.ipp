@@ -26,6 +26,7 @@ HTTPBasicAuth::encoded_str(types::request& req)
   //Encode
   size_t wr = beast::detail::base64::encode(
       &enc_str[0], &combine[0], combine.length());
+  (void)wr;
 
   return "Basic " + enc_str;
 }

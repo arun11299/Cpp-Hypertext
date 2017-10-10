@@ -317,6 +317,36 @@ public: // Exposed APIs
     return static_cast<unsigned>(result());
   }
 
+  size_t content_size() const noexcept
+  {
+    return this->body.size();
+  }
+
+  /*
+   * ATTN: Costly function
+   */
+  std::string content()
+  {
+    std::string data;
+    data.reserve(content_size());
+
+    auto buf_sequence = this->body.data();
+
+    for (auto seq : buf_sequence) {
+      auto* cbuf = boost::asio::buffer_cast<const char*>(seq);
+      data.append(cbuf, boost::asio::buffer_size(seq));
+    }
+
+    return data;
+  }
+
+  /*
+   */
+  typename body_type::value_type::const_buffers_type content_iter() noexcept
+  {
+    return this->body.data();
+  }
+
   /*
    */
   void set_chunked_response() noexcept
@@ -361,7 +391,7 @@ private:
  */
 struct result_type
 {
-  response response;
+  response resp;
   unsigned status_code;
 };
 

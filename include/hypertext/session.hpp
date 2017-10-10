@@ -102,7 +102,8 @@ private: // Private data structures
     boost::optional<std::chrono::milliseconds> timeout;
     boost::optional<bool>                      stream;
     boost::optional<std::string>               cert_file;
-    boost::optional<boost::variant<std::string, bool>> verify;
+    boost::optional<boost::variant<std::string, bool>>  verify;
+    boost::optional<std::map<std::string, std::string>> params;
 
   private:
     template <typename... Args>
@@ -163,6 +164,13 @@ private: // Private data structures
     void set_param(parameters::cert_param&& v, Args&&... args)
     {
       cert_file = v.get();
+      set_param(std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void set_param(parameters::params_param&& p, Args&&... args)
+    {
+      params = std::move(p.get());
       set_param(std::forward<Args>(args)...);
     }
 
