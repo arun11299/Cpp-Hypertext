@@ -85,6 +85,22 @@ params_param::get()
   return params_;
 }
 
+data_param::data_param(key_value_t&& m)
+  : data_(std::move(m))
+{
+}
+
+data_param::data_param(beast::string_view sv)
+  : data_(sv)
+{
+}
+
+boost::variant<key_value_t, beast::string_view>&
+data_param::get()
+{
+  return data_;
+}
+
 // Parameter creator function implementation
 // --------------------------------------------------------------
 
@@ -112,7 +128,7 @@ headers(
 {
   types::request_header rheader;
 
-  for (auto elem : kv) {
+  for (const auto& elem : kv) {
     rheader.set(elem.first, elem.second);
   }
 
@@ -123,13 +139,12 @@ template <typename HeaderConceptT>
 headers_param
 headers(HeaderConceptT&& hc)
 {
-  static_assert(is_header_compatible<typename std::decay<HeaderConceptT>::type>{},
+  static_assert(is_header_compatible<std::decay_t<HeaderConceptT>>{},
       "Type does not match the requirements for a header dictionary");
 
   hypertext::types::request_header rheader;
 
-  //FIXME: This copies!
-  for (auto elem : hc) {
+  for (const auto& elem : hc) {
     rheader.set(elem.first, elem.second);
   }
 
@@ -189,9 +204,9 @@ params(
             std::pair<beast::string_view, beast::string_view>
           >& kv)
 {
-  std::map<std::string, std::string> m;
+  key_value_t m;
 
-  for (auto elem : kv) {
+  for (const auto& elem : kv) {
     m.emplace(elem.first.data(), elem.second.data());
   }
 
@@ -202,16 +217,50 @@ template <typename HeaderConceptT>
 params_param
 params(HeaderConceptT&& hc)
 {
-  static_assert(is_header_compatible<typename std::decay<HeaderConceptT>::type>{},
+  static_assert(is_header_compatible<std::decay_t<HeaderConceptT>>{},
       "Type does not match the requirements for a header dictionary");
 
-  std::map<std::string, std::string> m;
+  key_value_t m;
 
-  for (auto& elem : hc) {
+  for (const auto& elem : hc) {
     m.emplace(elem.first, elem.second);
   }
 
   return params_param{std::move(m)};
+}
+
+data_param
+data(
+    const std::initializer_list<
+            std::pair<beast::string_view, beast::string_view>
+          >& kv)
+{
+  key_value_t m;
+
+  for (const auto& elem : kv) {
+    m.emplace(elem.first.data(), elem.second.data());
+  }
+
+  return data_param{std::move(m)};
+}
+
+template <typename HeaderConceptT>
+data_param
+data(HeaderConceptT&& hc)
+{
+  static_assert(is_header_compatible<std::decay_t<HeaderConceptT>>{},
+      "Type does not match the requirements for a header dictionary");
+
+  key_value_t m;
+
+  //FIXME: Code repetition...check if HeaderConcept
+  //can add requirements for initializer_list as well.
+
+  for (const auto& elem : hc) {
+    m.emplace(elem.first, elem.second);
+  }
+
+  return data_param{std::move(m)};
 }
 
 namespace literals {

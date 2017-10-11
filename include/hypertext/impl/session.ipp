@@ -54,6 +54,13 @@ types::result_type session<TransportAdapter>::get(Args&&... args)
 }
 
 template <typename TransportAdapter>
+template <typename... Args>
+types::result_type session<TransportAdapter>::post(Args&&... args)
+{
+  return request(parameters::method("POST"), std::forward<Args>(args)...);
+}
+
+template <typename TransportAdapter>
 void session<TransportAdapter>::fill_default_headers()
 {
   headers_.insert(beast::http::field::user_agent, "cpp-ht-requests");
@@ -98,9 +105,56 @@ prepare_request(request_parameters& p)
   request.target(path);
   request.version = 11;
 
+  if (*p.method == beast::http::verb::post) {
+    prepare_post_data(p, request);
+  }
+
   request.prepare_payload();
 
   return request;
+}
+
+
+template <typename TransportAdapter>
+void session<TransportAdapter>::
+prepare_post_data(request_parameters& p, types::request& request)
+{
+  if (p.data) {
+    switch ((p.data.get()).which()) {
+    case 0: // key_value_t
+    {
+      //Send in form encoded format.
+      const auto& contained = 
+        boost::get<parameters::key_value_t>(p.data.get());
+      std::string form_encoded;
+
+      //FIXME: Can be optimized in case there are
+      //tons of parameters that can be sent.
+      for (const auto& elem: contained) {
+        form_encoded += (elem.first + '=' + elem.second + '&');
+      }
+
+      if(form_encoded.length()) form_encoded.pop_back();
+ 
+      //Write the data into the body.
+      request.body = form_encoded;
+
+      //Insert the content type header
+      headers_.insert(beast::http::field::content_type, 
+          "application/x-www-form-urlencoded");
+      break;
+    }
+    case 1: // string_view
+    {
+      //Write the data into the body.
+      request.body = 
+        boost::get<beast::string_view>(p.data.get()).data();
+      break;
+    }
+    default:
+      BOOST_ASSERT_MSG (0, "CODE NOT REACHED");
+    };
+  }
 }
 
 } // END namespace hypertext

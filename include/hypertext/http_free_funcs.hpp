@@ -22,6 +22,16 @@ types::result_type get(Args&&... args)
  */
 template <typename TransportAdapter = adapter::asio_transport,
           typename... Args>
+types::result_type post(Args&&... args)
+{
+  session<TransportAdapter> sess;
+  return sess.post(std::forward<Args>(args)...);
+}
+
+/*
+ */
+template <typename TransportAdapter = adapter::asio_transport,
+          typename... Args>
 types::result_type put();
 
 /*

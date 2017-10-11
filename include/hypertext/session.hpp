@@ -104,6 +104,9 @@ private: // Private data structures
     boost::optional<std::string>               cert_file;
     boost::optional<boost::variant<std::string, bool>>  verify;
     boost::optional<std::map<std::string, std::string>> params;
+    boost::optional<
+      boost::variant<
+        parameters::key_value_t, beast::string_view>> data;
 
   private:
     template <typename... Args>
@@ -174,6 +177,14 @@ private: // Private data structures
       set_param(std::forward<Args>(args)...);
     }
 
+    template <typename... Args>
+    void set_param(parameters::data_param&& d, Args&&... args)
+    {
+      data = std::move(d.get());
+      set_param(std::forward<Args>(args)...);
+    }
+
+
     void set_param()
     {
       return;
@@ -188,6 +199,10 @@ private: // Private implementations
   /*
    */
   types::request prepare_request(request_parameters&);
+
+  /*
+   */
+  void prepare_post_data(request_parameters&, types::request&);
 
 private:
   /// The underlying transport mechanism

@@ -15,6 +15,8 @@
 namespace hypertext {
 namespace parameters {
 
+using key_value_t = std::map<std::string, std::string>;
+
 // Fwd. decl all the available paremters
 
 /// The HTTP method for the request.
@@ -49,6 +51,9 @@ struct cert_param;
 /// HTTP query string parameters
 struct params_param; 
 
+/// HTTP POST data parameters
+struct data_param;
+
 
 /// Method Parameter Definitions
 //------------------------------
@@ -81,7 +86,20 @@ struct params_param
   std::map<std::string, std::string>& get();
 
   //TODO: FIXME: I do not like this. Should be more generic
+  //FIXME: Almost all usage of std::string can somehow
+  //be changed to string_view. Check that!
   std::map<std::string, std::string> params_;
+};
+
+struct data_param
+{
+  data_param(key_value_t&&);
+  data_param(beast::string_view);
+
+  boost::variant<key_value_t, beast::string_view>&
+  get();
+
+  boost::variant<key_value_t, beast::string_view> data_;
 };
 
 struct auth_param
@@ -211,6 +229,20 @@ params(
 template <typename HeaderConceptT>
 params_param
 params(HeaderConceptT&&);
+
+/*
+ */
+data_param
+data(
+    const std::initializer_list<
+            std::pair<beast::string_view, beast::string_view>
+          >&);
+
+/*
+ */
+template <typename HeaderConceptT>
+data_param
+data(HeaderConceptT&&);
 
 } // END namespace parameters
 } // END namespace hypertext
