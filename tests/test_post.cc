@@ -19,7 +19,19 @@ void test_simple_post()
   return;
 }
 
+void test_json_post()
+{
+  std::string d = "{\"some\": \"data\"}";
+  auto res = ht::post(url("https://api.github.com/some/endpoint"),
+                      data(d));
+
+  auto text = res.resp.content();
+
+  std::cout << text << std::endl;
+}
+
 int main() {
   test_simple_post();
+  test_json_post();
   return 0;
 }

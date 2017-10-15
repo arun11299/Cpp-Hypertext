@@ -22,7 +22,8 @@ template <typename TransportAdapter>
 class session
 {
 public:
-  using transport_type = typename std::decay<TransportAdapter>::type;
+  using transport_type = std::decay_t<TransportAdapter>;
+  using result_type = types::result_type<TransportAdapter>;
 
 public: // 'tors
   session();
@@ -41,17 +42,17 @@ public: // Exposed APIs
   /*
    */
   template <typename... Args>
-  types::result_type request(Args&&... args);
+  result_type request(Args&&... args);
 
   /*
    */
   template <typename... Args>
-  types::result_type get(Args&&... args);
+  result_type get(Args&&... args);
 
   /*
    */
   template <typename... Args>
-  types::result_type post(Args&&... args);
+  result_type post(Args&&... args);
 
   /*
    */

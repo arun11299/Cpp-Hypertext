@@ -23,6 +23,30 @@ url_view::url_view(beast::string_view url)
                           ast_url_);
 }
 
+std::string url_view::build_query_string(
+     const std::map<std::string, std::string>& params) const
+{
+  if (!params.size()) return {};
+  std::string query{'?'};
+
+  for (const auto& p : params) {
+    query += (p.first + '=' + p.second + '&');
+  }
+  query.pop_back();
+
+  return query;
+}
+
+beast::string_view url_view::resource_name() const
+{
+  beast::string_view tgt = target();
+
+  size_t pos = tgt.rfind('/');
+  if (pos == std::string::npos) return {};
+
+  return tgt.substr(pos);
+}
+
 
 } // END namespace url
 } // END namespace hypertext

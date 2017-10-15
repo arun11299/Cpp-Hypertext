@@ -7,7 +7,7 @@ namespace types {
 template <typename Transport, typename CBS>
 chunked_response<Transport, CBS>::
 chunk_response_block::chunk_response_block(
-    std::reference_wrapper<response> resp)
+    std::reference_wrapper<response<Transport>> resp)
   : parent_resp_(resp)
 {
   //On Chunk header callback
@@ -105,6 +105,11 @@ operator!=(const typename chunked_response<Transport, CBS>::chunk_iterator& a,
 //   Response API Implementation
 //////////////////////////////////////////////////////////////////////
 
+template <typename TransportAdapter>
+auto make_result(response<TransportAdapter> resp)
+{
+  return result_type<TransportAdapter>{std::move(resp), resp.status_code()};
+}
 
 } // END namespace types
 } // END namespace hypertext

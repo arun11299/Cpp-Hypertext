@@ -22,7 +22,7 @@ session<TransportAdapter>::session()
 
 template <typename TransportAdapter>
 template <typename... Args>
-types::result_type session<TransportAdapter>::request(Args&&... args)
+auto session<TransportAdapter>::request(Args&&... args) -> result_type
 {
   static_assert(are_parameters<Args...>{},
       "Not all arguments passed models Parameter concept");
@@ -48,14 +48,14 @@ types::result_type session<TransportAdapter>::request(Args&&... args)
 
 template <typename TransportAdapter>
 template <typename... Args>
-types::result_type session<TransportAdapter>::get(Args&&... args)
+auto session<TransportAdapter>::get(Args&&... args) -> result_type
 {
   return request(parameters::method("GET"), std::forward<Args>(args)...);
 }
 
 template <typename TransportAdapter>
 template <typename... Args>
-types::result_type session<TransportAdapter>::post(Args&&... args)
+auto session<TransportAdapter>::post(Args&&... args) -> result_type
 {
   return request(parameters::method("POST"), std::forward<Args>(args)...);
 }

@@ -12,6 +12,9 @@ namespace adapter {
  */
 class asio_transport
 {
+public: // typedefs
+  using result_type = types::result_type<asio_transport>;
+
 public: // 'tors
   asio_transport();
   asio_transport(const asio_transport&) = delete;
@@ -35,20 +38,20 @@ public: // Exposed APIs
 
   /*
    */
-  types::result_type send(const types::request& req,
-                          beast::string_view    host, 
-                          uint16_t              port,
-                          bool                  stream);
+  result_type send(const types::request& req,
+                   beast::string_view    host, 
+                   uint16_t              port,
+                   bool                  stream);
 
   /*
    */
-  types::result_type send_secure(const types::request& req,
-                                 beast::string_view    host,
-                                 uint16_t              port,
-                                 bool                  stream,
-                                 const boost::optional<
-                                    boost::variant<std::string, bool>>& verify,
-                                 const boost::optional<std::string>& cert_file);
+  result_type send_secure(const types::request& req,
+                          beast::string_view    host,
+                          uint16_t              port,
+                          bool                  stream,
+                          const boost::optional<
+                                 boost::variant<std::string, bool>>& verify,
+                          const boost::optional<std::string>& cert_file);
 
   /*
    */
@@ -66,9 +69,10 @@ private: // Private implementation details
   /*
    */
   template <typename StreamObject>
-  types::response send_impl(StreamObject&         sobj,
-                            const types::request& req,
-                            bool                  stream);
+  types::response<asio_transport> 
+  send_impl(StreamObject&         sobj,
+            const types::request& req,
+            bool                  stream);
 
   /*
    */
@@ -78,7 +82,7 @@ private: // Private implementation details
   /*
    */
   template <typename DynamicBuffer>
-  void read_chunked_response(types::response& response,
+  void read_chunked_response(types::response<asio_transport>& response,
                              DynamicBuffer&   buf);
 
 private:

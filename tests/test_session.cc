@@ -12,7 +12,8 @@ void test_session_basic()
 
   auto res = sess.request(
         method("GET"),
-        url("http://127.0.0.1:8080"),
+        url("https://github.com/requests/requests/tarball/master"),
+        verify(false),
         stream(true)
       );
 
@@ -36,7 +37,7 @@ void test_session_basic()
   }
   */
 
-  auto cr = res.resp.chunk_response(sess.transport());
+  auto cr = res.resp.chunk_response();
   for (auto v : cr) { std::cout << v << std::endl; }
 
   for (auto& kv : res.resp.header()) {

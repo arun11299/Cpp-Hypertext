@@ -232,6 +232,15 @@ params(HeaderConceptT&&);
 
 /*
  */
+template <typename HeaderConceptT>
+auto
+data(HeaderConceptT&& hc) -> std::enable_if_t<
+                               is_header_compatible<std::decay_t<HeaderConceptT>>{},
+                               data_param
+                               >;
+
+/*
+ */
 data_param
 data(
     const std::initializer_list<
@@ -240,9 +249,8 @@ data(
 
 /*
  */
-template <typename HeaderConceptT>
 data_param
-data(HeaderConceptT&&);
+data(beast::string_view);
 
 } // END namespace parameters
 } // END namespace hypertext

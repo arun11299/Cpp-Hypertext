@@ -4,6 +4,7 @@
 #include <system_error>
 #include <fstream>
 #include <exception>
+#include <iostream>
 
 #include "beast/http/read.hpp"
 #include "beast/http/write.hpp"
@@ -29,11 +30,11 @@ asio_transport::~asio_transport()
   sock_.shutdown(tcp::socket::shutdown_both, ec);
 }
 
-types::result_type asio_transport::send(
+auto asio_transport::send(
     const types::request& req,
     beast::string_view    host,
     uint16_t              port,
-    bool                  stream)
+    bool                  stream) -> result_type
 {
   if (!is_connected()) {
     connect_to_peer(host, port);
@@ -42,17 +43,17 @@ types::result_type asio_transport::send(
 
   auto response = send_impl(sock_, req, stream);
 
-  return {std::move(response), response.status_code()};
+  return types::make_result(std::move(response));
 }
 
-types::result_type asio_transport::send_secure(
+auto asio_transport::send_secure(
     const types::request& req,
     beast::string_view    host,
     uint16_t              port,
     bool                  stream,
     const boost::optional<
       boost::variant<std::string, bool>>& verify,
-    const boost::optional<std::string>& cert_file)
+    const boost::optional<std::string>& cert_file) -> result_type
 {
   // Create the TCP connection
   if (!is_connected()) {
@@ -114,11 +115,12 @@ types::result_type asio_transport::send_secure(
 
   auto response = send_impl(ssl_stream, req, stream);
 
-  return {std::move(response), response.status_code()};
+  return types::make_result(std::move(response));
 }
 
 template <typename StreamObject>
-types::response asio_transport::send_impl(
+types::response<asio_transport> 
+asio_transport::send_impl(
     StreamObject& sobj,
     const types::request& req,
     bool stream)
@@ -126,7 +128,8 @@ types::response asio_transport::send_impl(
   beast::http::write(sobj, req);
 
   beast::flat_buffer buf;
-  types::response resp;
+  //FIXME: How about make_response() function
+  types::response<asio_transport> resp{*this};
  
   if (!stream) {
     beast::http::read(sobj, buf, resp);
@@ -150,6 +153,7 @@ void asio_transport::read_next_chunked_body(
     beast::http::read_header(sock_, buf, parser);
   }
 
+  std::cout << "Reading data" << std::endl;
   //Read as much data we can from the stream
   beast::http::read(sock_, buf, parser, ec);
 }

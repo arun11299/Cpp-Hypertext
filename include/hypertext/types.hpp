@@ -26,8 +26,8 @@ using emptybody_parser = beast::http::parser<false, beast::http::empty_body>;
 struct in_place_construct_t {};
 
 //Fwd Decl
-class response;
-struct result_type;
+template <typename T> class response;
+template <typename T> struct result_type;
 
 
 /*
@@ -69,7 +69,7 @@ class chunked_response
 public: //'tors
   /*
    */
-  chunked_response(response& resp, TransportAdapter& transport)
+  chunked_response(response<TransportAdapter>& resp, TransportAdapter& transport)
     : parent_resp_(resp)
     , transport_(transport)
   {
@@ -91,7 +91,7 @@ public: // Internal classes
     using storage_type = ChunkBodyStore;
 
   public: // 'tors
-    chunk_response_block(std::reference_wrapper<response>);
+    chunk_response_block(std::reference_wrapper<response<TransportAdapter>>);
     chunk_response_block(const chunk_response_block&) = delete;
     chunk_response_block(chunk_response_block&&) = default;
     chunk_response_block& operator=(const chunk_response_block&) = delete;
@@ -138,7 +138,7 @@ public: // Internal classes
     beast::error_code ec_;
 
     /// The original response
-    std::reference_wrapper<response> parent_resp_;
+    std::reference_wrapper<response<TransportAdapter>> parent_resp_;
 
     //Chunk decoding callbacks
     std::function<
@@ -273,7 +273,7 @@ public: // Exposed APIs
 
 private: // Data Members (chunked_response)
   ///
-  std::reference_wrapper<response> parent_resp_;
+  std::reference_wrapper<response<TransportAdapter>> parent_resp_;
   ///
   std::reference_wrapper<TransportAdapter> transport_;
   ///
@@ -283,11 +283,19 @@ private: // Data Members (chunked_response)
 
 /*
  */
+template <typename Transport>
 class response: 
   public beast::http::response<beast::http::dynamic_body>
 {
+public: // typedefs
+
+  using transport_type = std::decay_t<Transport>;
+
 public: // 'tors
-  response() = default;
+  response(transport_type& tranport)
+    : transport_(tranport)
+  {
+  }
   response(const response&) = delete;
   response(response&&) = default;
   response& operator=(const response&) = delete;
@@ -363,13 +371,12 @@ public: // Exposed APIs
 
   /*
    */
-  template <typename Transport>
-  chunked_response<Transport, std::string>
-  chunk_response(Transport& transport)
+  auto chunk_response()
   {
-    BOOST_ASSERT_MSG(has_chunked_response(), 
+    BOOST_ASSERT_MSG (has_chunked_response(), 
         "Response does not have any chunked body");
-    return chunked_response<Transport, std::string>{*this, transport};
+
+    return chunked_response<Transport, std::string>{*this, transport_};
   }
 
   /*
@@ -384,16 +391,25 @@ private:
   std::chrono::milliseconds elapsed_time_;
   ///
   bool has_chunked_response_ = false;
+  ///
+  transport_type& transport_;
 };
 
 
 /*
  */
+template <typename TransportAdapter>
 struct result_type
 {
-  response resp;
+  response<TransportAdapter> resp;
   unsigned status_code;
 };
+
+/*
+ */
+template <typename TransportAdapter>
+auto make_result(
+    response<TransportAdapter> resp);
 
 } // END namespace hypertext
 } // END namespace hypertext

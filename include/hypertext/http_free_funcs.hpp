@@ -12,7 +12,8 @@ namespace hypertext {
  */
 template <typename TransportAdapter = adapter::asio_transport,
           typename... Args>
-types::result_type get(Args&&... args)
+typename TransportAdapter::result_type 
+get(Args&&... args)
 {
   session<TransportAdapter> sess;
   return sess.get(std::forward<Args>(args)...);
@@ -22,7 +23,8 @@ types::result_type get(Args&&... args)
  */
 template <typename TransportAdapter = adapter::asio_transport,
           typename... Args>
-types::result_type post(Args&&... args)
+typename TransportAdapter::result_type
+post(Args&&... args)
 {
   session<TransportAdapter> sess;
   return sess.post(std::forward<Args>(args)...);
@@ -32,20 +34,40 @@ types::result_type post(Args&&... args)
  */
 template <typename TransportAdapter = adapter::asio_transport,
           typename... Args>
-types::result_type put();
+typename TransportAdapter::result_type
+put();
 
 /*
  */
 template <typename TransportAdapter = adapter::asio_transport,
           typename... Args>
-types::result_type delete_();
+typename TransportAdapter::result_type
+delete_();
 
 /*
  */
 template <typename TransportAdapter = adapter::asio_transport,
           typename... Args>
-types::result_type head();
+typename TransportAdapter::result_type 
+head();
+
+/*
+ */
+template <typename Stream, typename TransportAdapter>
+Stream& operator<<(Stream& os, types::response<TransportAdapter>& resp);
+
+
+/*
+ * If file_name not set, the URL file name would be taken as the
+ * file name.
+ */
+template <typename TransportAdapter = adapter::asio_transport>
+typename TransportAdapter::result_type
+download_file(beast::string_view url, 
+              boost::optional<beast::string_view> file_name = boost::none);
 
 }
+
+#include "hypertext/impl/http_free_funcs.ipp"
 
 #endif

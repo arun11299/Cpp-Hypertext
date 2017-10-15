@@ -232,8 +232,8 @@ params(HeaderConceptT&& hc)
 data_param
 data(
     const std::initializer_list<
-            std::pair<beast::string_view, beast::string_view>
-          >& kv)
+        std::pair<beast::string_view, beast::string_view>
+      >& kv)
 {
   key_value_t m;
 
@@ -244,9 +244,18 @@ data(
   return data_param{std::move(m)};
 }
 
-template <typename HeaderConceptT>
 data_param
-data(HeaderConceptT&& hc)
+data(beast::string_view sv)
+{
+  return data_param{sv};
+}
+
+template <typename HeaderConceptT>
+auto
+data(HeaderConceptT&& hc) -> std::enable_if_t<
+                              is_header_compatible<std::decay_t<HeaderConceptT>>{},
+                              data_param
+                             >
 {
   static_assert(is_header_compatible<std::decay_t<HeaderConceptT>>{},
       "Type does not match the requirements for a header dictionary");

@@ -32,10 +32,10 @@ void test_query_params()
   m["key1"] = "value1";
   m["key2"] = "value2";
 
-  res = ht::get(url("http://httpbin.org/get"),
+  auto res2 = ht::get(url("http://httpbin.org/get"),
                 params(std::move(m)));
 
-  std::cout << res.status_code << std::endl;
+  std::cout << res2.status_code << std::endl;
 }
 
 int main() {
