@@ -1,6 +1,8 @@
 #ifndef CPP_HT_RESPONSE_IPP
 #define CPP_HT_RESPONSE_IPP
 
+namespace beast = boost::beast;
+
 namespace hypertext {
 namespace types {
 

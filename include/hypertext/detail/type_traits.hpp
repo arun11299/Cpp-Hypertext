@@ -5,6 +5,8 @@
 #include <type_traits>
 #include "hypertext/types.hpp"
 
+namespace beast = boost::beast;
+
 namespace hypertext {
 namespace detail {
 

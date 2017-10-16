@@ -2,8 +2,10 @@
 #define CPP_HT_ASIO_TRANSPORT_ADAPTER_HPP
 
 #include "boost/asio.hpp"
-#include "beast/core/string.hpp"
+#include "boost/beast/core/string.hpp"
 #include "hypertext/types.hpp"
+
+namespace beast = boost::beast;
 
 namespace hypertext {
 namespace adapter {

@@ -6,11 +6,13 @@
 
 #include "boost/variant.hpp"
 
-#include "beast/http/verb.hpp"
-#include "beast/core/string.hpp"
+#include "boost/beast/http/verb.hpp"
+#include "boost/beast/core/string.hpp"
 
 #include "hypertext/types.hpp"
 #include "hypertext/auth_concept.hpp"
+
+namespace beast = boost::beast;
 
 namespace hypertext {
 namespace parameters {

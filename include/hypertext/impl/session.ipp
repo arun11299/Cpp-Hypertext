@@ -1,8 +1,8 @@
 #ifndef CPP_HT_IMPL_SESSION_IPP
 #define CPP_HT_IMPL_SESSION_IPP
 
-#include "beast/http/field.hpp"
-#include "beast/http/fields.hpp"
+#include "boost/beast/http/field.hpp"
+#include "boost/beast/http/fields.hpp"
 #include "hypertext/session.hpp"
 #include "hypertext/version.hpp"
 #include "hypertext/type_traits.hpp"
@@ -10,6 +10,7 @@
 #include <iostream>
 
 namespace urlp = hypertext::util::url_parser;
+namespace beast = boost::beast;
 
 namespace hypertext {
 
@@ -107,7 +108,7 @@ prepare_request(request_parameters& p)
 
   request.method(*(p.method));
   request.target(path);
-  request.version = 11;
+  request.version(11);
 
   if (*p.method == beast::http::verb::post) {
     prepare_post_data(p, request);
@@ -141,7 +142,7 @@ prepare_post_data(request_parameters& p, types::request& request)
       if(form_encoded.length()) form_encoded.pop_back();
  
       //Write the data into the body.
-      request.body = form_encoded;
+      request.body() = form_encoded;
 
       //Insert the content type header
       headers_.insert(beast::http::field::content_type, 
@@ -151,7 +152,7 @@ prepare_post_data(request_parameters& p, types::request& request)
     case 1: // string_view
     {
       //Write the data into the body.
-      request.body = 
+      request.body() = 
         boost::get<beast::string_view>(p.data.get()).data();
       break;
     }

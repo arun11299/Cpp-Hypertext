@@ -6,6 +6,7 @@
 
 namespace x3 = boost::spirit::x3;
 namespace urlp = hypertext::util::url_parser;
+namespace beast = boost::beast;
 
 namespace hypertext {
 namespace url {

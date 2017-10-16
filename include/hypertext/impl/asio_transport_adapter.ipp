@@ -5,8 +5,8 @@
 #include <fstream>
 #include <exception>
 
-#include "beast/http/read.hpp"
-#include "beast/http/write.hpp"
+#include "boost/beast/http/read.hpp"
+#include "boost/beast/http/write.hpp"
 
 #include <boost/asio/ssl.hpp>
 #include <boost/filesystem.hpp>
@@ -14,6 +14,7 @@
 using tcp = boost::asio::ip::tcp;
 namespace ssl = boost::asio::ssl;
 namespace fs = boost::filesystem;
+namespace beast = boost::beast;
 
 namespace hypertext {
 namespace adapter {

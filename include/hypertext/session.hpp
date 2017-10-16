@@ -11,6 +11,8 @@
 #include "hypertext/parameters.hpp"
 #include "hypertext/auth_concept.hpp"
 
+namespace beast = boost::beast;
+
 namespace hypertext {
 
 /*

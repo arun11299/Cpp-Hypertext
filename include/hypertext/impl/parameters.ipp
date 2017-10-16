@@ -4,6 +4,8 @@
 #include <utility>
 #include "hypertext/type_traits.hpp"
 
+namespace beast = boost::beast;
+
 namespace hypertext {
 namespace parameters {
 

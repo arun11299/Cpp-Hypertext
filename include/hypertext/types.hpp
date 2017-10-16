@@ -8,13 +8,15 @@
 
 #include <boost/assert.hpp>
 
-#include "beast/http/error.hpp"
-#include "beast/http/parser.hpp"
-#include "beast/http/message.hpp"
-#include "beast/http/empty_body.hpp"
-#include "beast/http/string_body.hpp"
-#include "beast/http/dynamic_body.hpp"
-#include "beast/core/flat_buffer.hpp"
+#include "boost/beast/http/error.hpp"
+#include "boost/beast/http/parser.hpp"
+#include "boost/beast/http/message.hpp"
+#include "boost/beast/http/empty_body.hpp"
+#include "boost/beast/http/string_body.hpp"
+#include "boost/beast/http/dynamic_body.hpp"
+#include "boost/beast/core/flat_buffer.hpp"
+
+namespace beast = boost::beast;
 
 namespace hypertext {
 namespace types {

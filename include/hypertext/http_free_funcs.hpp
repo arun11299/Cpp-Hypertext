@@ -6,6 +6,8 @@
 #include "hypertext/type_traits.hpp"
 #include "hypertext/asio_transport_adapter.hpp"
 
+namespace beast = boost::beast;
+
 namespace hypertext {
 
 /*

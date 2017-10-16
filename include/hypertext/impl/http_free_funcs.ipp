@@ -11,6 +11,8 @@
 
 #include "boost/filesystem.hpp"
 
+namespace beast = boost::beast;
+
 namespace hypertext {
 
 namespace { // Anonymous namespace

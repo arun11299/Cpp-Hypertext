@@ -10,3 +10,6 @@ g++ -g -std=c++14 -I /Users/amuralid/dev_test/cpp-hypertext/include -I /Users/am
 g++ -Wall -g -O2 -std=c++14 -I /Users/amuralid/dev_test/cpp-hypertext/include -I /Users/amuralid/Beast-master/include  -o test_get test_get.cc -l boost_system-mt -L /usr/local/Cellar//openssl/1.0.2j/lib/  -lssl -lcrypto -lboost_filesystem
 
 g++ -Wall -g -O2 -std=c++14 -I /Users/amuralid/dev_test/cpp-hypertext/include -I /Users/amuralid/Beast-master/include  -o test_post test_post.cc -l boost_system-mt -L /usr/local/Cellar//openssl/1.0.2j/lib/  -lssl -lcrypto -lboost_filesystem
+
+#### With BOOST
+g++ -std=c++14 -I /Users/amuralid/dev_test/cpp-hypertext/include -I /Users/amuralid/beast-master/include -o test_session test_session.cc  -l boost_system-mt -L /usr/local/Cellar//openssl/1.0.2j/lib/  -lssl -lcrypto -lboost_filesystem

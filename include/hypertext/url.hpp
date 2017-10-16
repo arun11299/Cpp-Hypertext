@@ -1,11 +1,12 @@
 #ifndef CPP_HT_URL_HPP
 #define CPP_HT_URL_HPP
 
-#include "beast/core/string.hpp"
+#include "boost/beast/core/string.hpp"
 #include "hypertext/utils/url_parser/parser.hpp"
 
 namespace urlp = hypertext::util::url_parser;
 namespace x3 = boost::spirit::x3;
+namespace beast = boost::beast;
 
 namespace hypertext {
 namespace url {

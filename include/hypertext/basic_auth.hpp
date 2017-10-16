@@ -3,8 +3,10 @@
 
 #include <string>
 
-#include "beast/core/detail/base64.hpp"
+#include "boost/beast/core/detail/base64.hpp"
 #include "hypertext/types.hpp"
+
+namespace beast = boost::beast;
 
 namespace hypertext {
 namespace auth {

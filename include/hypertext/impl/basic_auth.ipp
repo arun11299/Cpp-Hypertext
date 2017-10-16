@@ -4,7 +4,9 @@
 #include "hypertext/basic_auth.hpp"
 #include "hypertext/utils/ct_string.hpp"
 
-#include "beast/core/detail/base64.hpp"
+#include "boost/beast/core/detail/base64.hpp"
+
+namespace beast = boost::beast;
 
 namespace hypertext {
 namespace auth {
