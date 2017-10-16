@@ -38,6 +38,7 @@ Stream& handle_chunked_response(
 {
   auto chunk_resp = resp.chunk_response();
   for (auto chunk : chunk_resp) {
+    std::cout << "Writing......" << std::endl;
     os << chunk;
   }
 
@@ -62,17 +63,25 @@ Stream& operator<< (
 template <typename TransportAdapter = adapter::asio_transport>
 typename TransportAdapter::result_type
 download_file_impl(beast::string_view url,
-                   beast::string_view file,
+                   const std::string& file,
                    bool verify)
 {
   namespace para = parameters;
-  auto result = get(para::url(url), para::verify(verify));
+
+  //Streaming needs a session object to have greater lifetime.
+  session<adapter::asio_transport> sess;
+
+  auto result = sess.request(
+                      para::method("GET"),
+                      para::url(url), 
+                      para::headers({{"Accept-Encoding", "gzip, deflate"}}),
+                      para::verify(verify), 
+                      para::stream(true));
 
   BOOST_ASSERT_MSG (result.resp.has_chunked_response(),
       "Response is not for streaming");
 
-  std::ofstream out{file.data(), std::ios::binary};
-
+  std::ofstream out{file, std::ios::binary};
   if (!out) {
     std::string exp = std::string{"Failed to write to "} + file.data();
     throw FileError(std::move(exp));
@@ -98,6 +107,8 @@ download_file(beast::string_view url,
     throw UnexpectedURLFormat{std::move(msg)};
   }
 
+  std::string fname;
+
   if (!file_name) {
     url::url_view uview{url};
     beast::string_view rname = uview.resource_name();
@@ -105,13 +116,13 @@ download_file(beast::string_view url,
     if (!rname.length()) {
       throw UnexpectedURLFormat{"Resource name not found in URL"};
     }
-    file_name = rname;
+    fname = rname.data();
   }
 
-  BOOST_ASSERT_MSG (file_name, "File name to be saved could not be determined.");
+  BOOST_ASSERT_MSG (fname.length(), "File name to be saved could not be determined.");
 
   //FIXME: Verify is hard coded!!
-  return download_file_impl(url, *file_name, false);
+  return download_file_impl(url, fname, false);
 }
 
 }

@@ -2,6 +2,7 @@
 #define CPP_HT_IMPL_URL_IPP
 
 #include "hypertext/url.hpp"
+#include <iostream>
 
 namespace x3 = boost::spirit::x3;
 namespace urlp = hypertext::util::url_parser;
@@ -44,7 +45,7 @@ beast::string_view url_view::resource_name() const
   size_t pos = tgt.rfind('/');
   if (pos == std::string::npos) return {};
 
-  return tgt.substr(pos);
+  return tgt.substr(pos + 1);
 }
 
 

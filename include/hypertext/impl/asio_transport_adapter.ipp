@@ -127,7 +127,7 @@ asio_transport::send_impl(
   beast::http::write(sobj, req);
 
   beast::flat_buffer buf;
-  //FIXME: How about make_response() function
+  //TODO: How about make_response() function
   types::response<asio_transport> resp{*this};
  
   if (!stream) {

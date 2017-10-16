@@ -7,6 +7,8 @@
 #include "hypertext/version.hpp"
 #include "hypertext/type_traits.hpp"
 
+#include <iostream>
+
 namespace urlp = hypertext::util::url_parser;
 
 namespace hypertext {
@@ -34,6 +36,8 @@ auto session<TransportAdapter>::request(Args&&... args) -> result_type
   url_view_ = std::move(uview);
 
   auto req = prepare_request(rparams);
+
+  std::cout << req << std::endl;
 
   if (url_view_.scheme() == urlp::Scheme::HTTPS) {
     return transport_.send_secure(req, url_view_.host(), url_view_.port(),
@@ -79,7 +83,7 @@ prepare_request(request_parameters& p)
   // Update the headers
   if (p.req_headers) {
     for (auto& f : *p.req_headers) {
-      headers_.insert(f.name(), f.value());
+      headers_.set(f.name(), f.value());
     }
   }
 
