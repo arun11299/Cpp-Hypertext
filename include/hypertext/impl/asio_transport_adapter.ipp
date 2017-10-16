@@ -4,7 +4,6 @@
 #include <system_error>
 #include <fstream>
 #include <exception>
-#include <iostream>
 
 #include "beast/http/read.hpp"
 #include "beast/http/write.hpp"
@@ -153,7 +152,6 @@ void asio_transport::read_next_chunked_body(
     beast::http::read_header(sock_, buf, parser);
   }
 
-  std::cout << "Reading data" << std::endl;
   //Read as much data we can from the stream
   beast::http::read(sock_, buf, parser, ec);
 }
