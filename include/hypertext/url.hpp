@@ -80,7 +80,10 @@ public: //Exposed APIs
    */
   beast::string_view target() const
   {
-    return ast_url_.target_path_;
+    return ast_url_.target_path_.length()
+      ? ast_url_.target_path_
+      : "/"
+      ;
   }
 
   /*
