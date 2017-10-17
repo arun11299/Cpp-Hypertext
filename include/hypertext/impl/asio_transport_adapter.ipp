@@ -8,8 +8,9 @@
 #include "boost/beast/http/read.hpp"
 #include "boost/beast/http/write.hpp"
 
-#include <boost/asio/ssl.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
+#include <boost/utility/in_place_factory.hpp>
 
 using tcp = boost::asio::ip::tcp;
 namespace ssl = boost::asio::ssl;
@@ -79,12 +80,13 @@ auto asio_transport::send_secure(
   ssl::context ctx{ssl::context::sslv23_client};
 
   // Wrap the now-connected socket in an SSL ssl_stream
-  ssl::stream<tcp::socket&> ssl_stream{sock_, ctx};
+  //ssl_stream_ = boost::in_place(sock_, ctx);
+  ssl_stream_ = std::make_unique<ssl::stream<tcp::socket&>>(sock_, ctx);
 
   if (cert_ver && *cert_ver) {
-    ssl_stream.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
+    ssl_stream_->set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
   } else if (cert_ver && !*cert_ver){
-    ssl_stream.set_verify_mode(ssl::verify_none);
+    ssl_stream_->set_verify_mode(ssl::verify_none);
   }
 
   if (cert_path) {
@@ -94,7 +96,7 @@ auto asio_transport::send_secure(
       //FIXME
       //ctx.load_verify_path(*cert_path);
     }
-    ssl_stream.set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
+    ssl_stream_->set_verify_mode(ssl::verify_peer | ssl::verify_fail_if_no_peer_cert);
   }
 
   if (cert_file) {
@@ -111,9 +113,9 @@ auto asio_transport::send_secure(
   }
 
   // Perform SSL handshaking
-  ssl_stream.handshake(ssl::stream_base::client);
+  ssl_stream_->handshake(ssl::stream_base::client);
 
-  auto response = send_impl(ssl_stream, req, stream);
+  auto response = send_impl(*ssl_stream_, req, stream);
 
   return types::make_result(std::move(response));
 }
@@ -147,14 +149,26 @@ void asio_transport::read_next_chunked_body(
     types::emptybody_parser& parser,
     beast::error_code& ec)
 {
+  ssl_stream_ ? read_next_chunked_body_impl(*ssl_stream_, buf, parser, ec)
+              : read_next_chunked_body_impl(sock_, buf, parser, ec)
+              ;
+}
+
+template <typename StreamObj, typename DynamicBuffer>
+void asio_transport::read_next_chunked_body_impl(
+    StreamObj& sobj,
+    DynamicBuffer& buf,
+    types::emptybody_parser& parser,
+    beast::error_code& ec)
+{
   //Read the header if the routine is being
   //called for the first time.
   if (buf.size() == 0) {
-    beast::http::read_header(sock_, buf, parser);
+    beast::http::read_header(sobj, buf, parser);
   }
 
   //Read as much data we can from the stream
-  beast::http::read(sock_, buf, parser, ec);
+  beast::http::read(sobj, buf, parser, ec);
 }
 
 void asio_transport::connect_to_peer(

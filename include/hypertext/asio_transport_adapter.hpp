@@ -1,10 +1,14 @@
 #ifndef CPP_HT_ASIO_TRANSPORT_ADAPTER_HPP
 #define CPP_HT_ASIO_TRANSPORT_ADAPTER_HPP
 
+#include <memory>
+
 #include "boost/asio.hpp"
+#include <boost/asio/ssl.hpp>
 #include "boost/beast/core/string.hpp"
 #include "hypertext/types.hpp"
 
+using tcp = boost::asio::ip::tcp;
 namespace beast = boost::beast;
 
 namespace hypertext {
@@ -87,12 +91,26 @@ private: // Private implementation details
   void read_chunked_response(types::response<asio_transport>& response,
                              DynamicBuffer&   buf);
 
+  /*
+   */
+  template <typename StreamObj, typename DynamicBuffer>
+  void read_next_chunked_body_impl(StreamObj& sobj,
+                                   DynamicBuffer& buf, //parser buffer
+                                   types::emptybody_parser& p,
+                                   beast::error_code& ec);
+
 private:
   /// ASIO IO service event loop
   boost::asio::io_service ios_;
 
   /// The TCP socket
   boost::asio::ip::tcp::socket sock_;
+
+  /// The SSL wrapper over TCP socket
+  //FIXME unique_ptr here because I could not make in_place work
+  //with optional
+  std::unique_ptr<boost::asio::ssl::stream<tcp::socket&>> ssl_stream_;
+  //boost::optional<boost::asio::ssl::stream<tcp::socket&>> ssl_stream_;
 
   /// Check if connection is already established
   bool is_connected_ = false;

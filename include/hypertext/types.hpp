@@ -329,7 +329,7 @@ public: // Exposed APIs
 
   size_t content_size() const noexcept
   {
-    return this->body.size();
+    return this->body().size();
   }
 
   /*
@@ -354,7 +354,7 @@ public: // Exposed APIs
    */
   typename body_type::value_type::const_buffers_type content_iter() noexcept
   {
-    return this->body.data();
+    return this->body().data();
   }
 
   /*

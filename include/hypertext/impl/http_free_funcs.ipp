@@ -24,8 +24,12 @@ Stream& handle_regular_response(
     Stream& os, 
     types::response<TransportAdapter>& resp)
 {
-  for (auto seq : resp.content_iter()) {
-    os << boost::asio::buffer_cast<const char*>(seq);
+  auto cb_seq = resp.content_iter();
+
+  for (auto buf : cb_seq) {
+    //TODO: FIXME: Need stream concept ?
+    os.write(boost::asio::buffer_cast<const char*>(buf),
+             boost::asio::buffer_size(buf));
   }
 
   return os;
@@ -39,8 +43,7 @@ Stream& handle_chunked_response(
     types::response<TransportAdapter>& resp)
 {
   auto chunk_resp = resp.chunk_response();
-  for (auto chunk : chunk_resp) {
-    std::cout << "Writing......" << std::endl;
+  for (const auto& chunk : chunk_resp) {
     os << chunk;
   }
 
@@ -77,11 +80,11 @@ download_file_impl(beast::string_view url,
                       para::method("GET"),
                       para::url(url), 
                       para::headers({{"Accept-Encoding", "gzip, deflate"}}),
-                      para::verify(verify), 
-                      para::stream(true));
+                      //para::stream(true),
+                      para::verify(verify));
 
-  BOOST_ASSERT_MSG (result.resp.has_chunked_response(),
-      "Response is not for streaming");
+  /*BOOST_ASSERT_MSG (result.resp.has_chunked_response(),
+      "Response is not for streaming");*/
 
   std::ofstream out{file, std::ios::binary};
   if (!out) {
