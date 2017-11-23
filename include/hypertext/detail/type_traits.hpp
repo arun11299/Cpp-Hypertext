@@ -77,7 +77,7 @@ struct is_header_compatible<T, void_t<
 
                                 decltype(
                                     //TODO: Improve the traits check
-                                    std::declval<T&>().operator[](std::declval<const typename T::key_type&>()),
+                                    std::declval<T&>().operator[](std::declval<typename std::remove_reference_t<T>::key_type>()),
                                     std::declval<T&>().begin(),
                                     std::declval<T&>().end(),
                                     (void)0)

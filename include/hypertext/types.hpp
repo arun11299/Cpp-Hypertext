@@ -413,7 +413,7 @@ template <typename TransportAdapter>
 auto make_result(
     response<TransportAdapter> resp);
 
-} // END namespace hypertext
+} // END namespace types
 } // END namespace hypertext
 
 #include "hypertext/impl/response.ipp"

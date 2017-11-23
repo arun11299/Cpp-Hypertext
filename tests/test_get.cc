@@ -38,8 +38,19 @@ void test_query_params()
   std::cout << res2.status_code << std::endl;
 }
 
+void test_rift()
+{
+  auto res = ht::get(
+      url("https://10.110.4.4:8008/api/operational/project/default/vnfr-catalog/vnfr/f416166f-63ac-4f1a-bb70-3ad9f7163164"),
+      verify(false),
+      auth(ht::auth::HTTPBasicAuth{"admin", "admin"}));
+
+  std::cout << res.status_code << std::endl;
+}
+
 int main() {
   //test_simple_get();
-  test_query_params();
+  //test_query_params();
+  test_rift();
   return 0;
 }
